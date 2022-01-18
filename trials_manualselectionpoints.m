@@ -1,8 +1,9 @@
 clear; close all; clc;
 
 % add necessarypath 
-path_to_function = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
-addpath(path_to_function);
+% path_to_function = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
+path_to_function = "D:\Documents\MATLAB\GoICP_V1.3";
+% addpath(path_to_function);
 
 % read the point cloud from STL/PLY file
 ptCloud   = pcread('data/bunny/reconstruction/bun_zipper_res3.ply');
@@ -18,12 +19,17 @@ N_point    = 30;
 noises     = [0 1 2 3];
 init_poses = [5 10 20];
 n_trials   = 500;
+selectedpoint_str = sprintf('data/bunny/selectedpoints/bunny_%dpts_v2.mat', N_point);
 
 absolute_errors   = zeros(n_trials, 6, length(noises), length(init_poses));
 rmse_measurements = zeros(n_trials, 1, length(noises), length(init_poses));
 rmse_trues        = zeros(n_trials, 1, length(noises), length(init_poses));
 
-selectedpoint_str = sprintf('data/bunny/selectedpoints/bunny_%dpts_v1.mat', N_point);
+description.algorithm  = 'goicp';
+description.noises     = noises;
+description.init_poses = init_poses;
+description.trials     = n_trials;
+description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
     
 for init_pose=1:length(init_poses)
     
@@ -75,19 +81,19 @@ for trial=1:n_trials
 %                            'verbose', false, ...
 %                            'display', false);
 
-    % CPD Registration
-    % change the point structure to be suit to matlab icp built in function
-    moving = pointCloud(U');
-    fixed  = pointCloud(Y_breve');
-    % register with icp
-    [tform, movingReg, icp_rmse] = pcregistercpd( moving, ...
-                                          fixed, ...
-                                          'Transform', 'Rigid', ...
-                                          'OutlierRatio', 0.1, ...
-                                          'MaxIteration', 50, ...
-                                          'verbose', false);
-	% change the T form
-	T_all   = tform.T';
+%     % CPD Registration
+%     % change the point structure to be suit to matlab icp built in function
+%     moving = pointCloud(U');
+%     fixed  = pointCloud(Y_breve');
+%     % register with icp
+%     [tform, movingReg, icp_rmse] = pcregistercpd( moving, ...
+%                                           fixed, ...
+%                                           'Transform', 'Rigid', ...
+%                                           'OutlierRatio', 0.1, ...
+%                                           'MaxIteration', 50, ...
+%                                           'verbose', false);
+% 	% change the T form
+% 	T_all   = tform.T';
 
 
 %     % ICP Registration
@@ -102,6 +108,43 @@ for trial=1:n_trials
 %                                           'MaxIteration', 50 );
 % 	% change the T form
 %     T_all   = tform.T';
+
+    % GO-ICP Registration
+    % normalize everything
+    temp = [U, Y_breve]';
+    scale = max(max(temp));
+    temp = temp ./ scale;
+    data = temp(1:size(U, 2), :);
+    model = temp(size(U, 2)+1:end, :);
+    % store data.txt
+    fileID = fopen('data\temp\data.txt','w');
+    fprintf(fileID,'%d\n', size(data, 1));
+    fprintf(fileID,'%f %f %f\n', data');
+    fclose(fileID);
+    % store model.txt
+    fileID = fopen('data\temp\model.txt','w');
+    fprintf(fileID,'%d\n',  size(model, 1));
+    fprintf(fileID,'%f %f %f\n', model');
+    fclose(fileID);
+    % run GO-ICP
+    goicp_exe  = "GoICP_vc2012";
+    cmd = sprintf("%s %s %s %d %s %s", ...
+                  strcat(path_to_function, filesep, "bin", filesep, goicp_exe), ...
+                  "data\temp\model.txt", ...
+                  "data\temp\data.txt", ...
+                  30, ...
+                  strcat(path_to_function, filesep, "demo", filesep, "config.txt"), ...
+                  "data\temp\output.txt");
+    system(cmd);
+    % open output file
+    file = fopen('data\temp\output.txt', 'r');
+    time = fscanf(file, '%f', 1);
+    R    = fscanf(file, '%f', [3,3])';
+    t    = fscanf(file, '%f', [3,1]) * scale;
+    fclose(file);
+    % reformat the T
+    T_all = [R, t; 0 0 0 1];
+    
     
     %% calculate performance
 
@@ -111,7 +154,7 @@ for trial=1:n_trials
     Uest_breve = R_all * U_breve + t_all;
 
     absolute_errors(trial, :, noise, init_pose)    = abs(GT - [t_all', eul_all]);
-    rmse_measurements(trial, :, noise, init_pose)  = icp_rmse;
+    rmse_measurements(trial, :, noise, init_pose)  = NaN;
     rmse_trues(trial, :, noise, init_pose)         = mean(sqrt(sum((Uest_breve - Y_breve).^2, 2)));
 
 % end trials
@@ -120,13 +163,10 @@ end
 % end init_poses
 end
 
+
+save('results/goicptrials_bunny.mat', 'absolute_errors', 'rmse_measurements', 'rmse_trues', 'description');
+
 % end noise
 end
 
-description.algorithm  = 'icp';
-description.noises     = noises;
-description.init_poses = init_poses;
-description.trials     = n_trials;
-description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-save('results/icptrials_bunny.mat', 'absolute_errors', 'rmse_measurements', 'rmse_trues', 'description');
