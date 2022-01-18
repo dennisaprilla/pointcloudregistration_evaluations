@@ -1,7 +1,8 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'isotropic_v6trials_bunny';
+% filename = 'cpdtrials_bunny';
+filename = 'icptrials_bunny15';
 load(strcat(filename,'.mat'));
 
 % rearrange data, the requirement for boxplotGroup, please refer
@@ -22,14 +23,18 @@ for axis=1:(total_poses*2)
     init_pose = mod( axis-1, total_poses)+1;    
     subaxis(2,3, axis, 'SpacingVertical',0.15, 'SpacingHorizontal',0); hold on;
     
-    boxplotGroup( data(1:3,init_pose)', ...
-                  'PrimaryLabels', {'tx', 'ty', 'tz'}, ...
-                  'SecondaryLabels', {'0', '1', '2', '3'});
-              
+    if(axis<=3)
+        data_temp = data(1:3,init_pose)';
+        label = {'tx', 'ty', 'tz'};
+    else
+        data_temp = data(4:6,init_pose)';
+        label = {'rx', 'ry', 'rz'};
+    end
+    boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', {'0', '1', '2', '3'});   
     grid on;
     
     if(init_pose==1)
-        if(axis<3)
+        if(axis<=3)
             ylabel('Translation MAD (degree)');
         else
             ylabel('Rotation MAD (degree)');
