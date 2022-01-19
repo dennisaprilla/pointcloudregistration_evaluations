@@ -1,8 +1,7 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-% filename = 'cpdtrials_bunny';
-filename = 'icptrials_bunny15';
+filename = 'cpdtrials_bone';
 load(strcat(filename,'.mat'));
 
 % rearrange data, the requirement for boxplotGroup, please refer
@@ -42,7 +41,7 @@ for axis=1:(total_poses*2)
     else
         set(gca,'yticklabel', [])
     end
-    ylim([0, 5]);
+    ylim([0, 10]);
     title(sprintf('Initial Pose: %d', description.init_poses(init_pose)));
 end
 
