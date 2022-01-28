@@ -1,6 +1,4 @@
-clear;
-
-load('amode_areasphere_554cm');
+load('amode_areasphere_femur');
 
 figure1 = figure(1);
 figure1.WindowState  = 'maximized';

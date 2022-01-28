@@ -1,7 +1,7 @@
 clear; close all;
 
 % read the point cloud (bone) from STL/PLY file
-ptCloud          = stlread('data/bone/CT_Tibia_R.stl');
+ptCloud          = stlread('data/bone/CT_Femur_R.stl');
 ptCloud_scale    = 1000;
 ptCloud_Npoints  = size(ptCloud.Points,1);
 ptCloud_centroid = mean(ptCloud.Points, 1);
