@@ -1,8 +1,8 @@
 clc; clear all; close all;
 
-% path_to_function = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
-path_to_function = "D:\Documents\MATLAB\GoICP_V1.3";
-% addpath(path_to_function);
+path_to_function = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
+% path_to_function = "D:\Documents\MATLAB\GoICP_V1.3";
+addpath(path_to_function);
 
 %%
 
@@ -29,11 +29,31 @@ Y_breve      = random_R * U_breve + random_trans';
 
 % Read the simulated a-mode measurement point cloud, which is a subset of Ŭ.
 % These a-mode simulated measurement is manually selected from the bone model.
-selectedpoint_str = sprintf('data/bone/amode_measure.mat');
-load(selectedpoint_str);
-U = [vertcat(amode_prereg.Position); vertcat(amode_mid.Position)]';
+
+select = 2;
+if (select==1)
+    selectedpoint_str = sprintf('data/bone/amode_measure.mat');
+    U = [vertcat(amode_prereg.Position); vertcat(amode_mid.Position)]';
+elseif (select==2)
+    selectedpoint_str = sprintf('data/bone/amode_tibia_25.mat');
+    load(selectedpoint_str);
+    U = [ vertcat(amode_prereg1.Position); ...
+          vertcat(amode_prereg2.Position); ...
+          vertcat(amode_prereg3.Position); ...
+          vertcat(amode_mid.Position) ]' .* ptCloud_scale;
+else
+    selectedpoint_str = sprintf('data/bone/amode_tibia_30.mat');
+    load(selectedpoint_str);
+    U = [ vertcat(amode_prereg1.Position); ...
+          vertcat(amode_prereg2.Position); ...
+          vertcat(amode_prereg3.Position); ...
+          vertcat(amode_mid1.Position); ...
+          vertcat(amode_mid2.Position) ]' .* ptCloud_scale;
+end
+
+
 % add isotropic zero-mean gaussian noise to U, simulating noise measurement
-var_yacute   = 0;
+var_yacute   = 1;
 N_point      = size(U, 2);
 Sigma_yacute = var_yacute * eye(3);
 n_yacute     = mvnrnd( [0 0 0], Sigma_yacute, N_point)';
@@ -58,7 +78,7 @@ plot3( axes1, ...
        U(1,:), ...
        U(2,:), ...
        U(3,:), ...
-       'or', ...
+       'ob', ...
        'Tag', 'plot_U');
 %plot Y̆, the noiseless, complete, fixed dataset.
 plot3( axes1, ...
@@ -70,19 +90,59 @@ plot3( axes1, ...
 
 %%
 
-% CPD Registration
-% change the point structure to be suit to matlab icp built in function
-moving = pointCloud(U');
-fixed  = pcdownsample(pointCloud(Y_breve'), 'gridAverage', 5);
-% register with icp
-[tform, movingReg, icp_rmse] = pcregistercpd( moving, ...
-                                              fixed, ...
-                                              'Transform', 'Rigid', ...
-                                              'OutlierRatio', 0.15, ...
-                                              'MaxIteration', 100, ...
-                                              'verbose', false);
+description.algorithm  = 'ukf';
 
-T_all   = tform.T';
+if (strcmp(description.algorithm, 'icp'))
+
+    % ICP Registration
+    % change the point structure to be suit to matlab icp built in function
+    moving = pointCloud(U');
+    fixed  = pointCloud(Y_breve');
+    % register with icp
+    [tform, movingReg, icp_rmse] = pcregistericp( moving, ...
+                                                  fixed, ...
+                                                  'InlierRatio', 1, ...
+                                                  'Verbose', false, ...
+                                                  'MaxIteration', 50 );
+    % change the T form
+    T_all   = tform.T';
+    % store the rmse
+    rmse_measurement = icp_rmse;
+
+elseif (strcmp(description.algorithm, 'cpd'))
+
+    % CPD Registration
+    % change the point structure to be suit to matlab icp built in function
+    moving = pointCloud(U');
+    fixed  = pcdownsample( pointCloud(Y_breve'), 'gridAverage', 2);
+    % register with icp
+    [tform, movingReg, cpd_rmse] = pcregistercpd( moving, ...
+                                                  fixed, ...
+                                                  'Transform', 'Rigid', ...
+                                                  'OutlierRatio', 0.15, ...
+                                                  'MaxIteration', 150, ...
+                                                  'Tolerance', 1e-6, ...
+                                                  'verbose', false);
+    % change the T form
+    T_all   = tform.T';
+    % store the rmse
+    rmse_measurement = cpd_rmse;
+    
+elseif (strcmp(description.algorithm, 'ukf'))
+
+    % UKF Registration
+    [T_all, mean_dist] = ukf_isotropic_registration( U, Y_breve, U_breve, ...
+                           'threshold', 0.5, ...
+                           'iteration', 150, ...
+                           'expectednoise', 1.25*var_yacute, ...
+                           'sigmaxanneal', 0.98, ...
+                           'sigmaxtrans', 1.2*max_t, ...
+                           'sigmaxtheta', 1.2*max_theta, ...
+                           'verbose', false, ...
+                           'display', true);
+    % store the rmse
+    rmse_measurement = mean_dist;
+end
 
 %% calculate performance
 
