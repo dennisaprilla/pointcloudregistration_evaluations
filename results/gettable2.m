@@ -1,7 +1,7 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'icptrials_bone';
+filename = 'cpdtrials_bone';
 load(strcat(filename,'.mat'));
 
 n_initposes  = length(description.init_poses);

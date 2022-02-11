@@ -1,7 +1,7 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'cpdtrials_bone';
+filename = 'ukftrials2_bone';
 load(strcat(filename,'.mat'));
 
 % rearrange data, the requirement for boxplotGroup, please refer
@@ -13,6 +13,7 @@ for init_pose=1:length(description.init_poses)
     end
 end
 
+%{
 % use this block if you want to display trans and rots in the same figure
 % we use subaxis function to control more for the spacing for the subplot
 % https://www.mathworks.com/matlabcentral/fileexchange/3696-subaxis-subplot
@@ -46,13 +47,13 @@ for axis=1:(total_poses*2)
     ylim([0, 10]);
     title(sprintf('Initial Pose: %d', description.init_poses(init_pose)));
 end
-
 % saveas(fig1, sprintf('pictures/%s_trans', filename), 'png');
+%}
 
-%{
+%
 % use this block if you want to display trans and rots in the diff figure
 total_poses = length(description.init_poses);
-fig1 = figure('Name', 'Translation Error', 'Position', [0 0 1200 450]);
+fig1 = figure('Name', 'Translation Error', 'Position', [0 0 1200 550]);
 for axis=1:total_poses
    
     subaxis(1,3, axis, 'SpacingVertical',0, 'SpacingHorizontal', 0, 'MarginLeft', 0.09, 'MarginRight', 0); hold on;
@@ -77,7 +78,8 @@ set(fig1,'Units','Inches');
 pos = get(fig1,'Position');
 set(fig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
 print(fig1, sprintf('pictures/%s_trans', filename),'-dpdf','-r0');
-fig2 = figure('Name', 'Rotation Error', 'Position', [0 0 1200 450]);
+
+fig2 = figure('Name', 'Rotation Error', 'Position', [0 0 1200 550]);
 
 % window 2
 for axis=1:total_poses
@@ -103,4 +105,4 @@ set(fig2,'Units','Inches');
 pos = get(fig2,'Position');
 set(fig2,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
 print(fig2, sprintf('pictures/%s_rots', filename),'-dpdf','-r0');
-%}
+%
