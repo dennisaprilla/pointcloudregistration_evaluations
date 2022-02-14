@@ -39,7 +39,7 @@ grid on; axis equal; hold on;
 
 % load('amode_measure3.mat');
 % U = [ vertcat(amode_prereg.Position); vertcat(amode_mid.Position) ];
-filename = 'amode_tibia_30wd_accessible2';
+filename = 'amodewd_tibia2_30';
 load(strcat(filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
