@@ -1,7 +1,11 @@
+% This script is to generate table with 6x36 format
+% rows consist of 6 dof
+% columns consist of 3*3*4; 3 statistical test, 3 initpose, 4 noise
+
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'cpdtrials_bone';
+filename = 'goicptrials_bone';
 load(strcat(filename,'.mat'));
 
 n_initposes  = length(description.init_poses);
@@ -33,7 +37,7 @@ for dof=1:n_dofs
                 num_outliers = length(outliers);
             end
 
-            dataincell = [round(median(1),2), round(upperadjacent(1),2), round(num_outliers)];
+            dataincell = [round(median(1),3), round(upperadjacent(1),3), round(num_outliers)];
             for i=1:length(dataincell)
                 
                 if (dof<=3)

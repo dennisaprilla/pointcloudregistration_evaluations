@@ -1,3 +1,7 @@
+% This script is to generate table with 18x12 format
+% rows consist of 3*6; 3 statistical test, 6 dof
+% columns consist of 3*4; 3 initpose, 4 noise
+
 clear; close all;
 addpath(genpath('..\functions\display'));
 
