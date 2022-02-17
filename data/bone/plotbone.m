@@ -9,8 +9,7 @@ ptCloud_centroid = mean(ptCloud.Points, 1);
 U_breve          = ptCloud.Points - ptCloud_centroid;
 
 % display the femure bone
-% figure1 = figure('Name', 'Bone', 'Position', [0 -100 400 900]);
-figure1 = figure(1);
+figure1 = figure('Name', 'Bone', 'Position', [0 -100 400 900]);
 axes1 = axes('Parent', figure1);
 plot3( axes1, ...
        U_breve(:,1), ...
@@ -37,9 +36,7 @@ grid on; axis equal; hold on;
 %        'or', 'MarkerFaceColor', 'r', ...
 %        'Tag', 'plot_bone_full');
 
-% load('amode_measure3.mat');
-% U = [ vertcat(amode_prereg.Position); vertcat(amode_mid.Position) ];
-filename = 'amodewd_tibia1_30';
+filename = 'amode_tibia_30_c';
 load(strcat(filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
@@ -48,3 +45,10 @@ plot3( axes1, ...
        U(:,3), ...
        'or', 'MarkerFaceColor', 'r', ...
        'Tag', 'plot_bone_full');
+   
+% % save picture to pdf
+% % https://www.mathworks.com/matlabcentral/answers/12987-how-to-save-a-matlab-graphic-in-a-right-size-pdf
+% set(figure1,'Units','Inches');
+% pos = get(figure1,'Position');
+% set(figure1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
+% print(figure1, sprintf('%s', 'amode_tibiawd1_30'),'-dpdf','-r0');

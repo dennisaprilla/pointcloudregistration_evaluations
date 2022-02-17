@@ -28,10 +28,10 @@ z_steps  = linspace(max(U_breve(:,3)), min(U_breve(:,3)), n_step+2);
 z_planes = [ repmat( [ 0 0 1 ], n_step, 1), z_steps(2:end-1)' ];
 
 threshold = 0.00075;
-subplot_axes = [2,3, 6,7,8,  10,11];
+subplot_axes = [2,3,4, 6,7,8,  10,11];
 subplot_idx  = 1;
 
-z_plane_selection = [2,3,  8,10,12,  18,19];
+z_plane_selection = [2,3,4,  8,10,12,  18,19];
 
 for i=1:length(z_plane_selection)
     
