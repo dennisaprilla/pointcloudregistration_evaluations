@@ -12,7 +12,8 @@ U_breve          = ptCloud.Points - ptCloud_centroid;
 % display the femure bone
 figure1 = figure('Name', 'Bone');
 figure1.WindowState = 'maximized';
-axes1 = subplot(3, 4, [1 5 9]);
+axes1 = axes('Parent', figure1);
+% axes1 = subplot(3, 4, [1 5 9]);
 plot3( axes1, ...
        U_breve(:,1), ...
        U_breve(:,2), ...
@@ -23,15 +24,19 @@ plot3( axes1, ...
 xlabel(axes1, 'X'); ylabel(axes1, 'Y'); zlabel(axes1, 'Z');
 grid(axes1, 'on'); axis(axes1, 'equal'); hold(axes1, 'on');
 
-n_step   = 20;
-z_steps  = linspace(max(U_breve(:,3)), min(U_breve(:,3)), n_step+2);
-z_planes = [ repmat( [ 0 0 1 ], n_step, 1), z_steps(2:end-1)' ];
-
+n_step    = 30;
+z_steps   = linspace(max(U_breve(:,3)), min(U_breve(:,3)), n_step+2);
+z_planes  = [ repmat( [ 0 0 1 ], n_step, 1), z_steps(2:end-1)' ];
 threshold = 0.00075;
-subplot_axes = [2,3,4, 6,7,8,  10,11];
+
+
+figure2 = figure('Name', 'Slices');
+figure2.WindowState = 'maximized';
+subplot_axes = [1,2,3,4 6,7,8,9,10,  11,12,13];
 subplot_idx  = 1;
 
-z_plane_selection = [2,3,4,  8,10,12,  18,19];
+% z_plane_selection = [2,3,4,  6,8,10,12,14,  18,19];
+z_plane_selection = [3,4,5,6,  10,12,14,16,18,  27,28,29];
 
 for i=1:length(z_plane_selection)
     
@@ -48,7 +53,7 @@ for i=1:length(z_plane_selection)
            '.r', 'MarkerSize', 0.1, ...
            'Tag', 'plot_selectedUbreve');
        
-	axes2 = subplot(3, 4, subplot_axes(subplot_idx));
+	axes2 = subplot(3, 5, subplot_axes(subplot_idx), 'Parent', figure2);
     plot3( axes2, ...
            selected_U_breve(:,1), ...
            selected_U_breve(:,2), ...
@@ -57,7 +62,7 @@ for i=1:length(z_plane_selection)
            'Tag', 'plot_selectedUbreve_single');
     xlabel(axes2, 'X'); ylabel(axes2, 'Y'); zlabel(axes2, 'Z');
     grid(axes2, 'on'); axis(axes2, 'equal'); hold(axes2, 'on');
-    view(0,90);
+    view(axes2, 0,90);
 	
 
     subplot_idx = subplot_idx+1;

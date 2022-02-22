@@ -1,4 +1,4 @@
-close all; 
+% close all; 
 
 % read the point cloud (bone) from STL/PLY file
 ptCloud          = stlread('data/bone/CT_Tibia_R.stl');
@@ -36,8 +36,9 @@ grid on; axis equal; hold on;
 %        'or', 'MarkerFaceColor', 'r', ...
 %        'Tag', 'plot_bone_full');
 
-filename = 'amode_tibia_30_c';
-load(strcat(filename, '.mat'));
+filename = 'amode_tibia_5';
+path = 'amode_accessible_sim3';
+load(strcat(path, filesep, filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
        U(:,1), ...
