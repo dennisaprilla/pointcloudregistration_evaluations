@@ -1,4 +1,4 @@
-close all; 
+close all; clear;
 
 % read the point cloud (bone) from STL/PLY file
 ptCloud          = stlread('data/bone/CT_Tibia_R.stl');
@@ -23,15 +23,14 @@ plot3( axes1, ...
 xlabel('X'); ylabel('Y'); zlabel('Z');
 grid on; axis equal; hold on;
 
-% load('amode_measure3.mat');
-% U = [ vertcat(amode_prereg.Position); vertcat(amode_mid.Position) ];
-filename = 'amode_tibiawd1_30';
-load(strcat(filename, '.mat'));
-U = vertcat(amode_all.Position)';
+filename = 'amode_tibia_15_a';
+path = 'amode_accessible_sim3';
+load(strcat(path, filesep, filename, '.mat'));
+U = vertcat(amode_all.Position);
 plot3( axes1, ...
-       U(1,:), ...
-       U(2,:), ...
-       U(3,:), ...
+       U(:,1), ...
+       U(:,2), ...
+       U(:,3), ...
        'or', 'MarkerFaceColor', 'r', ...
        'Tag', 'plot_bone_full');
    
@@ -40,9 +39,10 @@ plot3( axes1, ...
 
 % obtain all combination of z rotation and translation
 range = 10;
-step  = 0.25;
+step  = 1;
 r_z   = (-range:step:range);
-t_z   = (-range/ptCloud_scale:step/ptCloud_scale:range/ptCloud_scale);
+% t_z   = (-range/ptCloud_scale:step/ptCloud_scale:range/ptCloud_scale);
+t_z = 0;
 % change z rotation to rotation matrix
 rs = [ r_z', zeros(length(r_z), 2) ];
 Rs = eul2rotm(deg2rad(rs), 'ZYX');
