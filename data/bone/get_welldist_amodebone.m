@@ -32,11 +32,11 @@ threshold = 0.00075;
 
 figure2 = figure('Name', 'Slices');
 figure2.WindowState = 'maximized';
-subplot_axes = [1,2,3,4 6,7,8,9,10,  11,12,13];
+subplot_axes = [1,2,3,4,5 6,7,8,9,10,  11,12,13];
 subplot_idx  = 1;
 
 % z_plane_selection = [2,3,4,  6,8,10,12,14,  18,19];
-z_plane_selection = [3,4,5,6,  10,12,14,16,18,  27,28,29];
+z_plane_selection = [2,3,4,5,6,  10,12,14,16,18,  27,28,29];
 
 for i=1:length(z_plane_selection)
     

@@ -1,4 +1,4 @@
-% close all; 
+close all; clear; clc;
 
 % read the point cloud (bone) from STL/PLY file
 ptCloud          = stlread('data/bone/CT_Tibia_R.stl');
@@ -36,8 +36,8 @@ grid on; axis equal; hold on;
 %        'or', 'MarkerFaceColor', 'r', ...
 %        'Tag', 'plot_bone_full');
 
-filename = 'amode_tibia_30';
-path = 'amode_accessible_sim2';
+filename = 'amode_tibia_15';
+path = 'amode_accessible_sim3';
 load(strcat(path, filesep, filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
@@ -53,3 +53,33 @@ plot3( axes1, ...
 % pos = get(figure1,'Position');
 % set(figure1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
 % print(figure1, sprintf('%s', 'amode_tibiawd1_30'),'-dpdf','-r0');
+
+filename = 'usdata_b_1a';
+path = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\boneUSsimple\outputs\usmeasurement_b';
+load(strcat(path, filesep, filename, '.mat'));
+Ub_pointcloud = bmode_simulation.pointcloud;
+plot3( axes1, ...
+       Ub_pointcloud(:,1), ...
+       Ub_pointcloud(:,2), ...
+       Ub_pointcloud(:,3), ...
+       'or', 'MarkerFaceColor', 'r', ...
+       'Tag', 'plot_bone_full');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

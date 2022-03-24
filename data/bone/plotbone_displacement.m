@@ -34,7 +34,6 @@ plot3( axes1, ...
        'or', 'MarkerFaceColor', 'r', ...
        'Tag', 'plot_bone_full');
 
-   
 range = 10;
 r_z   = (range:-1:0);
 rs    = [ r_z', zeros(length(r_z), 2) ];
