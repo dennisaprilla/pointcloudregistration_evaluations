@@ -35,14 +35,14 @@ if (select==1)
     selectedpoint_str = sprintf('data/bone/amode_measure.mat');
     U = [vertcat(amode_prereg.Position); vertcat(amode_mid.Position)]';
 elseif (select==2)
-    selectedpoint_str = sprintf('data/bone/amode_tibia_25.mat');
+    selectedpoint_str = sprintf('data/bone/amode_accessible_sim1/amode_tibia_25.mat');
     load(selectedpoint_str);
     U = [ vertcat(amode_prereg1.Position); ...
           vertcat(amode_prereg2.Position); ...
           vertcat(amode_prereg3.Position); ...
           vertcat(amode_mid.Position) ]' .* ptCloud_scale;
 else
-    selectedpoint_str = sprintf('data/bone/amode_tibia_30.mat');
+    selectedpoint_str = sprintf('data/bone/amode_accessible_sim1/amode_tibia_30.mat');
     load(selectedpoint_str);
     U = [ vertcat(amode_prereg1.Position); ...
           vertcat(amode_prereg2.Position); ...
@@ -90,7 +90,7 @@ plot3( axes1, ...
 
 %%
 
-description.algorithm  = 'ukf';
+description.algorithm  = 'cpd';
 
 if (strcmp(description.algorithm, 'icp'))
 

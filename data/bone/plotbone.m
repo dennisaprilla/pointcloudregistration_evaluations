@@ -54,7 +54,7 @@ plot3( axes1, ...
 % set(figure1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
 % print(figure1, sprintf('%s', 'amode_tibiawd1_30'),'-dpdf','-r0');
 
-filename = 'usdata_b_1a';
+filename = 'usdata_b_0b';
 path = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\boneUSsimple\outputs\usmeasurement_b';
 load(strcat(path, filesep, filename, '.mat'));
 Ub_pointcloud = bmode_simulation.pointcloud;
