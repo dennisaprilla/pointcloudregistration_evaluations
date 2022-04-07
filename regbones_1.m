@@ -44,19 +44,22 @@ clc; clear; close all;
 path_pointcloudregistration = pwd;
 % path to costfunction evaluation project
 % please refer ro to : https://github.com/dennisaprilla/costfunction_evaluation
-path_costfunctionevaluation = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\costfuntion_evaluation';
+path_costfunctionevaluation = 'D:\DennisChristie\costfunction_evaluation';
 % path to a GMMReg project by Bing Jian and Baba C. Vemuri
 % please refer to : https://github.com/bing-jian/gmmreg
-path_gmmreg  = 'D:\Documents\BELANDA\PhD Thesis\Code\cpp\gmmreg\MATLAB\GaussTransform';
+path_gmmreg       = 'D:\DennisChristie\gmmreg\MATLAB\GaussTransform';
+% path to a CMA-ES project
+path_cmaes        = 'D:\DennisChristie\pointcloudregistration_evaluations\functions\optimizers\CMAES';
 
 % path to the bone model
 path_bone         = strcat(path_pointcloudregistration, filesep, 'data', filesep, 'bone');
 % path to the a-mode US measurement simulation
-path_amode        = strcat(path_bone, filesep, filesep, 'amode_accessible_sim3');
+path_amode        = strcat(path_bone, filesep, filesep, 'amode_accessible_sim2');
 % path to shifting constant
 path_shiftconst   = strcat(path_costfunctionevaluation, filesep, 'results', filesep, 'amode_simulations', filesep, 'accessible_sim2');
 % path to cost function for optimization
 path_costfunction = 'functions\costfunction';
+path_experimental = 'functions\experimental';
 % path to store the outputs
 path_output       = 'results';
 
@@ -65,7 +68,9 @@ addpath(path_bone);
 addpath(path_amode);
 addpath(path_shiftconst);
 addpath(path_gmmreg);
+addpath(path_experimental);
 addpath(path_costfunction);
+addpath(path_cmaes);
 
 % debug mode, if displaybone is true, it will (as the name suggests)
 % display the process of registration. the simulation will also only run once
@@ -142,7 +147,7 @@ ultrafinereg_shiftconst = shiftingconstant(amode_config);
 ultrafinereg_useshiftconst = false;
 
 % set up matlab optimizer parameters;
-optimizer = 'fmincon';
+optimizer = 'cmaes';
 x0        = [0 0 0 0 0 0];
 A         = [];
 b         = [];
@@ -151,45 +156,54 @@ beq       = [];
 lb        = [ deg2rad([-3 -3 -10]), ([-3, -3, -10]/ptCloud_scale) ];
 ub        = [ deg2rad([ 3  3  10]), ([ 3,  3,  10]/ptCloud_scale) ];
 nonlcon   = [];
-intcon    = [];
 
 if (strcmp(optimizer, 'fmincon'))
     options = optimoptions('fmincon', ...
-                           'Display', 'iter', ...
+                           'Display', 'off', ...
                            'SpecifyObjectiveGradient', false, ...
                            'FunctionTolerance', 1e-8, ...
                            'StepTolerance', 1e-6, ...
                            'MaxFunctionEvaluations', 1000);
-else
+elseif (strcmp(optimizer, 'ga'))
     options = optimoptions( 'ga', ...
                             'Display', 'iter', ...
                             'FunctionTolerance', 1e-8, ...
-                            'PopulationSize', 50, ...
+                            'PopulationSize', 100, ...
                             'MaxGenerations', 200*6, ...
                             'MaxTime', 30, ...
                             'UseParallel', true);
+elseif (strcmp(optimizer, 'cmaes'))
+    options.UBounds   = ub';
+    options.LBounds   = lb';
+    options.ParforRun = 'on';
+    options.ParforWorkers = 64;
+    options.TolX      = 1e-6;
+    options.TolFun    = 1e-8;
+    options.MaxIter   = 1000;
+    options.DispFinal = 'off';
+    options.DispModulo = Inf;
 end
                    
 %% Simulation Setup (Trials related)
                        
 % setup the noise constants
 noise_levels            = [1 2 3];
-init_poses              = [3 5 8];
+init_poses              = [3 5];
 n_trials                = 100;
 
 % naming the filename for result
-filepath = 'results';
+filepath_results = 'results';
 
 % create a metadata for the simulation
 % metadata for algorithm
-simulation_config.ultrafinereg.algorithm   = ultrafinereg_name;
-simulation_config.ultrafinereg.scaleconst  = ultrafinereg_scaleconst;
-simulation_config.ultrafinereg.scale_a     = ultrafinereg_scale_a;
+sim_config.ultrafinereg.algorithm   = ultrafinereg_name;
+sim_config.ultrafinereg.scaleconst  = ultrafinereg_scaleconst;
+sim_config.ultrafinereg.scale_a     = ultrafinereg_scale_a;
 % metadata for noise
-simulation_config.noise_levels    = noise_levels;
-simulation_config.init_poses      = init_poses;
-simulation_config.trials          = n_trials;
-simulation_config.result_dimdesc  = ["trials", "observation dimensions", "noises", "initial poses"];
+sim_config.noise_levels    = noise_levels;
+sim_config.init_poses      = init_poses;
+sim_config.trials          = n_trials;
+sim_config.result_dimdesc  = ["trials", "observation dimensions", "noises", "initial poses"];
 
 %% Simulation Start
 
@@ -242,7 +256,7 @@ for trial=1:n_trials
     random_trans = -max_t     + (max_t -(-max_t))         .* rand(1, 3);
     random_theta = -max_theta + (max_theta -(-max_theta)) .* rand(1, 3);
     random_R     = eul2rotm(deg2rad(random_theta), 'ZYX');
-    GT           = [random_trans, random_theta];
+    DoF6_GT      = [random_trans, random_theta];
     Y_breve      = (random_R * U_breve' + random_trans')';
     
     % show figure for sanity check
@@ -261,21 +275,12 @@ for trial=1:n_trials
     
     %% Fine-Registration
     
-    fprintf('Register with ICP');
+    fprintf('Fine registration...');
+    my_tic = tic;
+    [T_finereg, ~] = fineregistration(Ua_noised, Y_breve, 'cpd', []);
+    exec_time = toc(my_tic);
+    fprintf('(%.2fs) ', exec_time);
     
-    [T_finereg, rmse_measurement] = fineregistration(Ua_noised, Y_breve, 'cpd', []);
-    
-    %{
-    % change the point structure to be suit to matlab icp built in function
-    moving = pointCloud(Ua_noised);
-    fixed  = pointCloud(Y_breve);
-    % register with icp
-    [tform, ~, icp_rmse] = pcregistericp( moving, ...
-                                          fixed, ...
-                                          'InlierRatio', 1, ...
-                                          'Verbose', true, ...
-                                          'MaxIteration', 30 );
-    %}
     % extract the R and t from T
     R_finereg       = T_finereg(1:3, 1:3);
     t_finereg       = T_finereg(1:3, 4)';
@@ -367,19 +372,31 @@ for trial=1:n_trials
         pause(1);        
     end
    
-    fprintf('Register with GMM');
+    fprintf('Ultrafine registration...');
     
     % setup parameter to the optimizer
     config.model_a   = Ua_noised;
     config.scene_a   = Y_breve_fineregCS;
     config.scale_a   = ultrafinereg_scale_a * ultrafinereg_scaleconst;
+    
+    my_tic = tic;
     % starting the optimization-based registration in Fine Registration Coordinate System
     if (strcmp(optimizer, 'fmincon'))
         param        = fmincon(@gmmL2_R_a, x0, A, b, Aeq, beq, lb, ub, nonlcon, options, config);
-    else
-        costfunction = @(X) gmmL2_R_a( X, config);
+        
+    elseif (strcmp(optimizer, 'ga'))
+        costfunction = @(X) gmmL2_R_a(X, config);
         param        = ga(costfunction, length(x0), A, b, Aeq, beq, lb, ub, nonlcon, options);
+        
+    elseif (strcmp(optimizer, 'cmaes'))
+        cmaes_sigma_r = deg2rad([1.5 1.5 5]);
+        cmaes_sigma_t = [1.5 1.5 5] / ptCloud_scale;
+        cmaes_sigma   = [cmaes_sigma_r, cmaes_sigma_t]';
+        param = cmaes_parfor('gmmL2_R_a', x0, cmaes_sigma, options, config);
+        param = param';
     end
+    exec_time = toc(my_tic);
+    fprintf('(%.2fs) \n', exec_time);
     
     % extract the R and t from param (rotation from costfunction is already in radians)
     % Note: this R and t is in Fine Registration Coordinate System
@@ -428,9 +445,12 @@ for trial=1:n_trials
     
     % Nevertheless, we are working in our original coordinate system, so we
     % need to construct the overall transformation.
-    T_all  = T_ultrafinereg * T_finereg;
-    R_all  = T_all(1:3, 1:3);
-    t_all  = T_all(1:3, 4)';
+    T_all    = T_ultrafinereg * T_finereg;
+    R_all    = T_all(1:3, 1:3);
+    eul_all  = rad2deg(rotm2eul(R_all, 'ZYX'));
+    t_all    = T_all(1:3, 4)';
+    % store the 6dof value for performance calculation
+    DoF6_est = [t_all, eul_all];
     % transform
     Ua_final = (R_all * Ua_noised' + t_all')';
     % transform the U_breve just for visualization (not for calculation)
@@ -458,15 +478,38 @@ for trial=1:n_trials
                'Tag', 'U_breve_finereg');
         title('Ultrafine-registration Applied');
         
-        % if debug mode go out of the loop
-        break;
     end
     
     %% calculate performance
     
+    % calculate error
+    error = diff([DoF6_GT; DoF6_est]);
+    % calculate rmse_measurment
+    [~, nearest_dist] = knnsearch(Y_breve, Ua_final);
+    rmse_measurement  = mean(nearest_dist);
+    % calculate rmse_true
+    rmse_true        = mean(sqrt(sum((U_breve_final - Y_breve).^2, 2)));
+    
+    % display performance
+    disp(DoF6_GT);
+    disp(DoF6_est);
+    disp(error);
+    
+    errors(trial, :, noise_level, init_pose)             = error;
+    rmse_measurements(trial, :, noise_level, init_pose)  = rmse_measurement;
+    rmse_trues(trial, :, noise_level, init_pose)         = rmse_true;
+    
+    % if debug mode go out of the loop
+    if( displaybone )
+        break;
+    end
     
 % end trials     
 end
+
+% save the trials
+save( strcat(filepath_results, filesep, 'atrials_1.mat'), ...
+      'errors', 'rmse_measurements', 'rmse_trues', 'sim_config');
 
 % if debug mode go out of the loop
 if( displaybone )
@@ -484,6 +527,9 @@ end
 % end init pose
 end
 
+% delete data stored by cmaes
+delete *.dat
+delete variablescmaes.mat
 
 
 

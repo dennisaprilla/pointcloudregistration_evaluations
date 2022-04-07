@@ -50,15 +50,15 @@ clc; clear; close all;
 path_pointcloudregistration = pwd;
 % path to a project which generates a simple b-mode US simulation measurement
 % please refer to : https://github.com/dennisaprilla/boneUSsimple.git
-path_boneUSsimple = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\boneUSsimple';
+path_boneUSsimple = 'D:\DennisChristie\boneUSsimple';
 % path to a GMMReg project by Bing Jian and Baba C. Vemuri
 % please refer to : https://github.com/bing-jian/gmmreg
-path_gmmreg       = 'D:\Documents\BELANDA\PhD Thesis\Code\cpp\gmmreg\MATLAB\GaussTransform';
+path_gmmreg       = 'D:\DennisChristie\gmmreg';
 % path to a GO-ICP project by J, Yang. et al.
 % please refer to : https://github.com/yangjiaolong/Go-ICP
-path_goicp        = 'D:\Documents\MATLAB\GoICP_V1.3';
+path_goicp        = 'D:\DennisChristie\Go-ICP\build';
 % path to a CMA-ES project
-path_cmaes        = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\pointcloudregistration_evaluations\functions\optimizers\CMAES';
+path_cmaes        = 'D:\DennisChristie\pointcloudregistration_evaluations\functions\optimizers\CMAES';
 
 % path to the bone model
 path_bone      = strcat(path_pointcloudregistration, filesep, 'data', filesep, 'bone');
@@ -88,7 +88,7 @@ addpath(path_cmaes);
 
 % debug mode, if displaybone is true, it will (as the name suggests)
 % display the process of registration. the simulation will also only run once
-displaybone = true;
+displaybone = false;
 
 % clear unneccesary variables
 clear path_pointcloudregistration path_boneUSsimple path_gmmreg;
@@ -197,7 +197,7 @@ elseif (strcmp(optimizer, 'cmaes'))
     options.UBounds   = ub';
     options.LBounds   = lb';
     options.ParforRun = 'on';
-    options.ParforWorkers = 6;
+    options.ParforWorkers = 64;
     options.TolX      = 1e-6;
     options.TolFun    = 1e-8;
     options.MaxIter   = 1000;
@@ -211,10 +211,10 @@ end
 noise_levels            = [1 2 3];
 noise_tconst            = 1;
 noise_skewconst         = 0.025;
-noise_Rconst            = 1.25;
+noise_Rconst            = 1;
 % setup simulation related configuration
 init_poses              = [3 5 8];
-n_trials                = 100;
+n_trials                = 250;
 use_boneportion         = true;
 
 % if use_boneportion is specified, we will use only the portion of the bone
@@ -232,11 +232,12 @@ if(use_boneportion)
                '.b', ...
                'MarkerSize', 0.1, ...
                'Tag', 'plot_U_breve_part');
+
+        title('Initial Setup');
+
+        drawnow;
+        pause(0.5);
     end
-    title('Initial Setup');
-    
-    drawnow;
-    pause(0.5);
 end
 
 % naming the filename for result
@@ -618,9 +619,9 @@ for trial=1:n_trials
 % end trials     
 end
 
-% save the trials
-save( strcat(filepath_results, filesep, 'abtrials.mat'), ...
-      'errors', 'rmse_measurements', 'rmse_trues', 'sim_config');
+% % save the trials
+% save( strcat(filepath_results, filesep, 'abtrials_1.mat'), ...
+%       'errors', 'rmse_measurements', 'rmse_trues', 'sim_config');
 
 % if debug mode go out of the loop
 if( displaybone )
@@ -638,6 +639,9 @@ end
 % end init pose
 end
 
+% delete data stored by cmaes
+delete *.dat
+delete variablescmaes.mat
 
 
 
