@@ -8,6 +8,7 @@ ptCloud_Npoints  = size(ptCloud.Points,1);
 ptCloud_centroid = mean(ptCloud.Points, 1);
 % prepare Ŭ, the noiseless, complete, moving dataset
 U_breve          = ptCloud.Points - ptCloud_centroid;
+U_breve_normals  = STLVertexNormals(ptCloud.ConnectivityList, ptCloud.Points);
 
 % display the femure bone
 figure1 = figure('Name', 'Bone');

@@ -5,15 +5,13 @@ path_bone   = 'data\bone';
 path_amode  = 'data\bone\amode_normals';
 path_result = 'results';
 % path to project
-path_icpnormal = 'functions\experimental';
 path_ukf   = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
 path_goicp = "D:\Documents\MATLAB\GoICP_V1.3";
 
-addpath(path_icpnormal);
 addpath(path_ukf);
 addpath(path_goicp);
 
-displaybone = false;
+displaybone = true;
 
 %% Prepare the bone point cloud
 
@@ -76,21 +74,19 @@ end
 
 %% Simulation Config
 
-noises            = [0 1 2 3];
+noises            = [2 3];
 noisenormal_const = 3;
-init_poses        = [3 5 8 10];
-n_trials          = 1;
+init_poses        = [5 8 10];
+n_trials          = 100;
 
-description.algorithm  = 'ukfnormal';
+description.algorithm  = 'icpnormal';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-filename_result   = sprintf('%s_trials%d.mat', description.algorithm, 1);
+filename_result   = sprintf('%s_%d.mat', description.algorithm, 1);
 
-GTs               = zeros(n_trials, 6, length(noises), length(init_poses));
-estimations       = zeros(n_trials, 6, length(noises), length(init_poses));
 errors            = zeros(n_trials, 6, length(noises), length(init_poses));
 rmse_measurements = zeros(n_trials, 1, length(noises), length(init_poses));
 rmse_trues        = zeros(n_trials, 1, length(noises), length(init_poses));
@@ -210,23 +206,127 @@ for trial=1:n_trials
         
     elseif (strcmp(description.algorithm, 'icpnormal'))
         
-        % ICP normal registration
-        moving       = U_noised;
-        movingnormal = U_hat_noised * ptCloud_scale;
-        fixed        = Y_breve;
-        fixednormal  = Y_breve_hat * ptCloud_scale;
-        [T_all, icpnormal_rmse] = icpnormal( moving, movingnormal, ...
-                                             fixed, fixednormal, ...
-                                             U_breve, ...
-                                             'iteration', 100, ...
-                                             'threshold', 1, ...
-                                             'normalratio', 0.05, ...
-                                             'ransacdistance', 5, ...
-                                             'verbose', true, ...
-                                             'display', true);
-
+        
+        figure2 = figure('Name', 'ICP Normal Registration', 'Position', [0 0 350 780]);
+        axes2 = axes('Parent', figure2);
+        plot3( axes2, ...
+               U_breve(:,1), ...
+               U_breve(:,2), ...
+               U_breve(:,3), ...
+               '.', 'Color', [0.7 0.7 0.7], ...
+               'MarkerSize', 0.1, ...
+               'Tag', 'plot2_Ubreve');
+        grid on; axis equal; hold on;
+        xlabel('X'); ylabel('Y'); zlabel('Z');
+        plot3( axes2, ...
+               U_noised(:,1), ...
+               U_noised(:,2), ...
+               U_noised(:,3), ...
+               'or', ...
+               'Tag', 'plot2_U_noised');
+        quiver3(axes2, ...
+                U_noised(:,1),     U_noised(:,2),     U_noised(:,3), ...
+                U_hat_noised(:,1), U_hat_noised(:,2), U_hat_noised(:,3), 0.1, ...
+                'Tag', 'plot2_Uhat_noised');
+        plot3( axes2, ...
+               Y_breve(:,1), ...
+               Y_breve(:,2), ...
+               Y_breve(:,3), ...
+               '.g', 'MarkerSize', 0.1, ...
+               'Tag', 'plot2_Ybreve');           
+        
+        % parameter
+        max_iter  = 100;
+        threshold = 1;
+        normalratio = 0.05;
+        ransacdistance = 
+        % initialization
+        U_breve_current      = U_breve;
+        U_noised_current     = U_noised;
+        U_hat_noised_current = U_hat_noised * ptCloud_scale;
+        Y_breve_hat_current  = Y_breve_hat * ptCloud_scale;
+        T_all                = eye(4);
+        % start iteration
+        for i=1:max_iter
+            % construct the current point position and orientation
+            % moving    = U_noised_current;
+            % fixed     = Y_breve;
+            moving    = [U_noised_current, U_hat_noised_current * normalratio];
+            fixed     = [Y_breve, Y_breve_hat_current * normalratio];
+            % search for correspondences using normal
+            nearest_idx   = knnsearch(fixed, moving, 'Distance', 'euclidean');
+            nearest_point = Y_breve(nearest_idx, :);
+            
+            % plot
+            plot3( axes2, ...
+                   nearest_point(:,1), ...
+                   nearest_point(:,2), ...
+                   nearest_point(:,3), ...
+                   'dr', 'MarkerFaceColor', 'm', ...
+                   'Tag', 'plot2_pointpair');
+            for j=1:size(U_noised_current,1)
+                temp_pointPair = [U_noised_current(j,:); nearest_point(j,:)];
+                plot3( axes2, temp_pointPair(:,1), temp_pointPair(:,2), temp_pointPair(:,3), ...
+                       '-m', 'Tag', 'plot2_pointpair');
+            end       
+            
+            % estimate the transformation
+            try
+                tform = estimateGeometricTransform3D( U_noised_current, ...
+                                                      nearest_point, ...
+                                                      'rigid', ...
+                                                      'MaxDistance', 5 );
+            catch
+                warning('icpnormal encounter a problem: not enough inlier to estimate tform');
+                continue;
+            end
+            % rearange the T (because i like this kind of form) and store it
+            T_current = tform.T';
+            T_all     = T_current * T_all;
+            % extract the T and transform
+            t_current = T_current(1:3, 4);
+            R_current = T_current(1:3, 1:3);
+            U_noised_current     = (R_current * U_noised_current' + t_current)';
+            U_hat_noised_current = (R_current * U_hat_noised_current')';
+            % transform Ubreve so we know what is happening
+            U_breve_current      = (R_current * U_breve_current' + t_current)';
+            
+            % plot
+            delete(findobj('Tag', 'plot2_pointpair'));
+            delete(findobj('Tag', 'plot2_Ubreve'));
+            delete(findobj('Tag', 'plot2_U_noised'));
+            delete(findobj('Tag', 'plot2_Uhat_noised'));
+            plot3( axes2, ...
+                   U_breve_current(:,1), ...
+                   U_breve_current(:,2), ...
+                   U_breve_current(:,3), ...
+                   '.', 'Color', [0.7 0.7 0.7], ...
+                   'MarkerSize', 0.1, ...
+                   'Tag', 'plot2_Ubreve');
+            plot3( axes2, ...
+                   U_noised_current(:,1), ...
+                   U_noised_current(:,2), ...
+                   U_noised_current(:,3), ...
+                   'or', ...
+                   'Tag', 'plot2_U_noised');
+            quiver3(axes2, ...
+                    U_noised_current(:,1),     U_noised_current(:,2),     U_noised_current(:,3), ...
+                    U_hat_noised_current(:,1), U_hat_noised_current(:,2), U_hat_noised_current(:,3), 0.1, ...
+                    'Tag', 'plot2_Uhat_noised');
+            
+            % calculate rmse
+            rmse_current =  mean(sqrt(sum((U_noised_current - nearest_point).^2)));
+            % breaking point
+            if (rmse_current<threshold)
+                break;
+            end
+            
+            drawnow;
+        end
+        
         % store the rmse
-        rmse_measurement = icpnormal_rmse;        
+        rmse_measurement = rmse_current;
+        
 
     elseif (strcmp(description.algorithm, 'cpd'))
     
@@ -247,7 +347,7 @@ for trial=1:n_trials
         % store the rmse
         rmse_measurement = cpd_rmse;
         
-    elseif (strcmp(description.algorithm, 'cpdnormal'))
+    elseif (strcmp(description.algorithm, 'cpd'))
         
         % to be implemented
 
@@ -275,8 +375,8 @@ for trial=1:n_trials
                                            'movingnormal', movingnormal, ...
                                            'fixednormal', fixednormal, ...
                                            'normalratio', 0.05, ...
-                                           'threshold', 0.0001, ...
-                                           'iteration', 100, ...
+                                           'threshold', 0.2, ...
+                                           'iteration', 50, ...
                                            'expectednoise', 1.0*noise_normal, ...
                                            'sigmaxanneal', 0.98, ...
                                            'sigmaxtrans', 1.0*max_t, ...
@@ -356,11 +456,9 @@ for trial=1:n_trials
     end
     
     % store the results
-    GTs(trial, :, noise, init_pose)               = GT;
-    estimations(trial, :, noise, init_pose)       = [t_all', eul_all];
-    errors(trial, :, noise, init_pose)            = diff( [GT; [t_all', eul_all] ], 1, 1);
-    rmse_measurements(trial, :, noise, init_pose) = rmse_measurement;
-    rmse_trues(trial, :, noise, init_pose)        = mean(sqrt(sum((Uest_breve - Y_breve).^2, 2)));
+    errors(trial, :, noise, init_pose)             = diff( [GT; [t_all', eul_all] ], 1);
+    rmse_measurements(trial, :, noise, init_pose)  = rmse_measurement;
+    rmse_trues(trial, :, noise, init_pose)         = mean(sqrt(sum((Uest_breve - Y_breve).^2, 2)));
 
     % if debug mode go out of the loop
     if( displaybone )
@@ -379,7 +477,7 @@ end
 % save the trials if not debug mode
 if (~displaybone)
     save( strcat(path_result, filesep, filename_result), ...
-          'GTs', 'estimations', 'errors', 'rmse_measurements', 'rmse_trues', 'description');
+          'errors', 'rmse_measurements', 'rmse_trues', 'description');
 % if debug mode, go out of the loop
 else
     break;
