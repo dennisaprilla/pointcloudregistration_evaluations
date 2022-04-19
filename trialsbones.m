@@ -4,11 +4,13 @@ clc; clear; close all;
 path_bone   = 'data\bone';
 path_amode  = 'data\bone\amode_normals';
 path_result = 'results';
+
 % path to project
 path_icpnormal = 'functions\experimental';
-path_ukf   = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
-path_goicp = "D:\Documents\MATLAB\GoICP_V1.3";
+path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_goicp     = 'D:\DennisChristie\Go-ICP\build\demo';
 
+% add paths
 addpath(path_icpnormal);
 addpath(path_ukf);
 addpath(path_goicp);
@@ -79,9 +81,9 @@ end
 noises            = [0 1 2 3];
 noisenormal_const = 3;
 init_poses        = [3 5 8 10];
-n_trials          = 1;
+n_trials          = 500;
 
-description.algorithm  = 'ukfnormal';
+description.algorithm  = 'icpnormal';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
@@ -105,10 +107,12 @@ max_theta = init_poses(init_pose);
 
 for noise=1:length(noises)
     
-noise_point = noises(noise);
+noise_point  = noises(noise);
 noise_normal = noise_point * noisenormal_const;
 
-for trial=1:n_trials
+trial = 1;
+while (trial <= n_trials)
+% for trial=1:n_trials
     fprintf('init pose: %d, noise: %d, trial: %d\n', init_pose, noise, trial);
     
     %% apply some random noise
@@ -222,11 +226,18 @@ for trial=1:n_trials
                                              'threshold', 1, ...
                                              'normalratio', 0.05, ...
                                              'ransacdistance', 5, ...
-                                             'verbose', true, ...
-                                             'display', true);
+                                             'verbose', false, ...
+                                             'display', false);
 
-        % store the rmse
-        rmse_measurement = icpnormal_rmse;        
+        % sometimes ransac method in normal icp cant find the inlier, and
+        % it will produce error, so redo this loop is that happen
+        if (isnan(icpnormal_rmse))
+            trial = trial-1;
+            continue;
+        % if there is no error, just do as usual
+        else
+            rmse_measurement = icpnormal_rmse;  
+        end            
 
     elseif (strcmp(description.algorithm, 'cpd'))
     
@@ -254,15 +265,16 @@ for trial=1:n_trials
     elseif (strcmp(description.algorithm, 'ukf'))
 
         % UKF Registration
-        [T_all, mean_dist] = ukf_isotropic_registration( U_noised', Y_breve', U_breve', ...
-                               'threshold', 0.5, ...
-                               'iteration', 150, ...
-                               'expectednoise', 1.25*noise_point, ...
-                               'sigmaxanneal', 0.98, ...
-                               'sigmaxtrans', 1.2*max_t, ...
-                               'sigmaxtheta', 1.2*max_theta, ...
-                               'verbose', false, ...
-                               'display', false);
+        [T_all, mean_dist, history] = ukf_isotropic_registration( U_noised', Y_breve', U_breve', ...
+                                           'threshold', 0.0001, ...
+                                           'iteration', 100, ...
+                                           'expectednoise', 1.0*noise_point, ...
+                                           'sigmaxanneal', 0.98, ...
+                                           'sigmaxtrans', 1.0*max_t, ...
+                                           'sigmaxtheta', 1.0*max_theta, ...
+                                           'bestrmse', true, ...
+                                           'verbose', false, ...
+                                           'display', false);
         % store the rmse
         rmse_measurement = mean_dist;
         
@@ -284,7 +296,6 @@ for trial=1:n_trials
                                            'bestrmse', true, ...
                                            'verbose', false, ...
                                            'display', false);
-                           
         % store the rmse
         rmse_measurement = mean_dist;
 
@@ -295,8 +306,8 @@ for trial=1:n_trials
         temp = [U_noised, Y_breve]';
         scale = max(max(temp));
         temp = temp ./ scale;
-        data = temp(1:size(U, 2), :);
-        model = temp(size(U, 2)+1:end, :);
+        data = temp(1:size(U_noised, 2), :);
+        model = temp(size(U_noised, 2)+1:end, :);
         % store data.txt
         fileID = fopen('data\temp\data.txt','w');
         fprintf(fileID,'%d\n', size(data, 1));
@@ -372,6 +383,9 @@ for trial=1:n_trials
         disp(errors(trial, :, noise, init_pose));
         break;
     end
+    
+    % increase the index of the loop
+    trial = trial+1;
 
 % end trials
 end
