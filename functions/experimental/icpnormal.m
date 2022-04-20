@@ -122,6 +122,8 @@ for iter=1:iteration
                                               'MaxDistance', ransacdistance );
     catch
         warning('icpnormal encounter a problem: not enough inlier to estimate tform');
+        T_all = eye(4);
+        mean_dist = NaN;
         return;
     end
     

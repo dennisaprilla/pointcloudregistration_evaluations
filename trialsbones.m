@@ -81,7 +81,7 @@ end
 noises            = [0 1 2 3];
 noisenormal_const = 3;
 init_poses        = [3 5 8 10];
-n_trials          = 500;
+n_trials          = 100;
 
 description.algorithm  = 'icpnormal';
 description.noises     = noises;
@@ -232,7 +232,6 @@ while (trial <= n_trials)
         % sometimes ransac method in normal icp cant find the inlier, and
         % it will produce error, so redo this loop is that happen
         if (isnan(icpnormal_rmse))
-            trial = trial-1;
             continue;
         % if there is no error, just do as usual
         else
