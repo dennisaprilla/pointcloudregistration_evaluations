@@ -15,7 +15,7 @@ addpath(path_icpnormal);
 addpath(path_ukf);
 %addpath(path_goicp);
 
-displaybone = true;
+displaybone = false;
 
 %% Prepare the bone point cloud
 
@@ -362,6 +362,10 @@ while (trial <= n_trials)
         R    = fscanf(file, '%f', [3,3])';
         t    = fscanf(file, '%f', [3,1]) * scale;
         fclose(file);
+        % delete the file
+        delete('data\temp\data.txt');
+        delete('data\temp\model.txt');
+        delete('data\temp\output.txt');
         % reformat the T
         T_all = [R, t; 0 0 0 1];
         % no rmse reported, so give it NaN
