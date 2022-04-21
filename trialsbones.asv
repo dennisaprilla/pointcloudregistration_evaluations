@@ -51,7 +51,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_tibia_15';
+filename_amodedata = 'amode_tibia_2';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -85,9 +85,9 @@ end
 
 %% Simulation Config
 
-noises            = [0, 0.5, 1.0, 1.5, 2.0, 2.5];
+noises            = [2 3];
 noisenormal_const = 3;
-init_poses        = [3 5 8 10];
+init_poses        = [8 10];
 n_trials          = 100;
 
 description.algorithm  = 'ukfnormal';
@@ -121,13 +121,14 @@ noise_normal = noise_point * noisenormal_const;
 trial = 1;
 while (trial <= n_trials)
 % for trial=1:n_trials
-    fprintf('init pose: %d, noise: %d, trial: %d... ', init_pose, noise, trial);
+    fprintf('init pose: %d, noise: %d, trial: %d\n', init_pose, noise, trial);
     
     %% apply some random noise
 
     % % add isotropic zero-mean gaussian noise to U, simulating noise measurement
     % % uncomment this block if you want to use standard deviation for noise
-    random_point   = -(noise_point) + 2*(noise_point) * rand(size(U, 1), 3);
+    % random_point   = -(0.5*noise_point) + 2*(0.5*noise_point) * rand(size(U, 1), 3);
+    random_point   = -(0.5*noise_point) + 2*(0.5*noise_point) * rand(size(U, 1), 3);
     U_noised       = U + random_point;
     
     % if the algorithm specified by user is using normal, we provide the
@@ -199,7 +200,6 @@ while (trial <= n_trials)
 
     %% registration
     
-    t_start = tic;
     if (strcmp(description.algorithm, 'icp'))
 
         % ICP Registration
@@ -254,8 +254,8 @@ while (trial <= n_trials)
                                                       fixed, ...
                                                       'Transform', 'Rigid', ...
                                                       'OutlierRatio', 0.15, ...
-                                                      'MaxIteration', 150, ...
-                                                      'Tolerance', 1e-8, ...
+                                                      'MaxIteration', 200, ...
+                                                      'Tolerance', 1e-9, ...
                                                       'verbose', false);
     	% change the T form
     	T_all   = tform.T';
@@ -271,7 +271,7 @@ while (trial <= n_trials)
         % UKF Registration
         [T_all, mean_dist, history] = ukf_isotropic_registration( U_noised', Y_breve', U_breve', ...
                                            'threshold', 0.0001, ...
-                                           'iteration', 200, ...
+                                           'iteration', 100, ...
                                            'expectednoise', 1.0*noise_point, ...
                                            'sigmaxanneal', 0.98, ...
                                            'sigmaxtrans', 1.0*max_t, ...
@@ -307,14 +307,14 @@ while (trial <= n_trials)
                                            'fixednormal', fixednormal, ...
                                            'normalratio', 0.025, ...
                                            'threshold', 0.0001, ...
-                                           'iteration', 150, ...
+                                           'iteration', 100, ...
                                            'expectednoise', 1.2*noise_normal, ...
                                            'sigmaxanneal', 0.98, ...
                                            'sigmaxtrans', 1.0*max_t, ...
                                            'sigmaxtheta', 1.0*max_theta, ...
                                            'bestrmse', true, ...
-                                           'verbose', false, ...
-                                           'display', false);
+                                           'verbose', true, ...
+                                           'display', true);
         % store the rmse
         rmse_measurement = mean_dist;
 
@@ -367,8 +367,7 @@ while (trial <= n_trials)
         % no rmse reported, so give it NaN
         rmse_measurement = NaN;
     end
-    t_end = toc(t_start);
-    fprintf(' (time: %.4fs)\n', t_end);    
+    
     
     %% calculate performance
 
