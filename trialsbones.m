@@ -15,7 +15,7 @@ addpath(path_icpnormal);
 addpath(path_ukf);
 %addpath(path_goicp);
 
-displaybone = true;
+displaybone = false;
 
 %% Prepare the bone point cloud
 
@@ -78,9 +78,9 @@ end
 
 %% Simulation Config
 
-noises            = [2 3];
+noises            = [0 1 2 3];
 noisenormal_const = 3;
-init_poses        = [8 10];
+init_poses        = [3 5 8 10];
 n_trials          = 100;
 
 description.algorithm  = 'goicp';
