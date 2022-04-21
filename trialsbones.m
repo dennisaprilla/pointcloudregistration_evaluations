@@ -8,14 +8,14 @@ path_result = 'results';
 % path to project
 path_icpnormal = 'functions\experimental';
 path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP\build\demo';
+path_goicp     = 'D:\DennisChristie\Go-ICP\build';
 
 % add paths
 addpath(path_icpnormal);
 addpath(path_ukf);
-addpath(path_goicp);
+%addpath(path_goicp);
 
-displaybone = false;
+displaybone = true;
 
 %% Prepare the bone point cloud
 
@@ -78,12 +78,12 @@ end
 
 %% Simulation Config
 
-noises            = [0 1 2 3];
+noises            = [2 3];
 noisenormal_const = 3;
-init_poses        = [3 5 8 10];
+init_poses        = [8 10];
 n_trials          = 100;
 
-description.algorithm  = 'icpnormal';
+description.algorithm  = 'goicp';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
@@ -302,11 +302,11 @@ while (trial <= n_trials)
             
         % GO-ICP Registration
         % normalize everything
-        temp = [U_noised, Y_breve]';
-        scale = max(max(temp));
+        temp = [U_noised; Y_breve];
+        scale = max(max(abs(temp)));
         temp = temp ./ scale;
-        data = temp(1:size(U_noised, 2), :);
-        model = temp(size(U_noised, 2)+1:end, :);
+        data = temp(1:size(U_noised, 1), :);
+        model = temp(size(U_noised, 1)+1:end, :);
         % store data.txt
         fileID = fopen('data\temp\data.txt','w');
         fprintf(fileID,'%d\n', size(data, 1));
@@ -316,15 +316,24 @@ while (trial <= n_trials)
         fileID = fopen('data\temp\model.txt','w');
         fprintf(fileID,'%d\n',  size(model, 1));
         fprintf(fileID,'%f %f %f\n', model');
-        fclose(fileID);    
+        fclose(fileID); 
+%         % verify the data
+%         model_read = readpoints('data\temp\model.txt');
+%         data_read = readpoints('data\temp\data.txt');
+%         figure(3);
+%         plot3(data_read(1,:), data_read(2,:), data_read(3,:), 'or');
+%         hold on; grid on;
+%         plot3(model_read(1,:),  model_read(2,:),  model_read(3,:), '.b');
+%         hold off; axis equal; title('Initial Pose');
+%         break;
         % run GO-ICP
         goicp_exe  = "GoICP_vc2012";
         cmd = sprintf("%s %s %s %d %s %s", ...
-                      strcat(path_to_function, filesep, "bin", filesep, goicp_exe), ...
+                      strcat(path_goicp, filesep, "demo", filesep, goicp_exe), ...
                       "data\temp\model.txt", ...
                       "data\temp\data.txt", ...
-                      N_point, ...
-                      strcat(path_to_function, filesep, "demo", filesep, "config.txt"), ...
+                      size(U_noised, 1), ...
+                      strcat(path_goicp, filesep, "demo", filesep, "config_modified.txt"), ...
                       "data\temp\output.txt");
         system(cmd);
         % open output file
