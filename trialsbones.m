@@ -8,7 +8,8 @@ path_result = 'results';
 % path to project
 path_icpnormal = 'functions\experimental';
 path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP\build';
+path_goicp     = 'D:\Documents\MATLAB\GoICP_V1.3';
+
 
 % add paths
 addpath(path_icpnormal);
@@ -342,6 +343,10 @@ while (trial <= n_trials)
         R    = fscanf(file, '%f', [3,3])';
         t    = fscanf(file, '%f', [3,1]) * scale;
         fclose(file);
+        % delete the file
+        delete('data\temp\data.txt');
+        delete('data\temp\model.txt');
+        delete('data\temp\output.txt');
         % reformat the T
         T_all = [R, t; 0 0 0 1];
         % no rmse reported, so give it NaN

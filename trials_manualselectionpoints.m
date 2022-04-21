@@ -156,15 +156,19 @@ for trial=1:n_trials
     absolute_errors(trial, :, noise, init_pose)    = abs(GT - [t_all', eul_all]);
     rmse_measurements(trial, :, noise, init_pose)  = NaN;
     rmse_trues(trial, :, noise, init_pose)         = mean(sqrt(sum((Uest_breve - Y_breve).^2, 2)));
+    
+    break;
 
 % end trials
 end
 
+break;
+    
 % end init_poses
 end
 
-
-save('results/goicptrials_bunny.mat', 'absolute_errors', 'rmse_measurements', 'rmse_trues', 'description');
+break;
+% save('results/goicptrials_bunny.mat', 'absolute_errors', 'rmse_measurements', 'rmse_trues', 'description');
 
 % end noise
 end
