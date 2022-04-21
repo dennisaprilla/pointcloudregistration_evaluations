@@ -10,10 +10,11 @@ path_icpnormal = 'functions\experimental';
 path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
 path_goicp     = 'D:\Documents\MATLAB\GoICP_V1.3';
 
+
 % add paths
 addpath(path_icpnormal);
 addpath(path_ukf);
-addpath(path_goicp);
+%addpath(path_goicp);
 
 displaybone = true;
 
@@ -78,7 +79,7 @@ end
 
 %% Simulation Config
 
-noises            = [0 1 2 3];
+noises            = [2 3];
 noisenormal_const = 3;
 init_poses        = [8 10];
 n_trials          = 100;
@@ -303,7 +304,7 @@ while (trial <= n_trials)
         % GO-ICP Registration
         % normalize everything
         temp = [U_noised; Y_breve];
-        scale = max(max(temp));
+        scale = max(max(abs(temp)));
         temp = temp ./ scale;
         data = temp(1:size(U_noised, 1), :);
         model = temp(size(U_noised, 1)+1:end, :);
@@ -316,7 +317,16 @@ while (trial <= n_trials)
         fileID = fopen('data\temp\model.txt','w');
         fprintf(fileID,'%d\n',  size(model, 1));
         fprintf(fileID,'%f %f %f\n', model');
-        fclose(fileID);    
+        fclose(fileID); 
+%         % verify the data
+%         model_read = readpoints('data\temp\model.txt');
+%         data_read = readpoints('data\temp\data.txt');
+%         figure(3);
+%         plot3(data_read(1,:), data_read(2,:), data_read(3,:), 'or');
+%         hold on; grid on;
+%         plot3(model_read(1,:),  model_read(2,:),  model_read(3,:), '.b');
+%         hold off; axis equal; title('Initial Pose');
+%         break;
         % run GO-ICP
         goicp_exe  = "GoICP_vc2012";
         cmd = sprintf("%s %s %s %d %s %s", ...
@@ -324,7 +334,7 @@ while (trial <= n_trials)
                       "data\temp\model.txt", ...
                       "data\temp\data.txt", ...
                       size(U_noised, 1), ...
-                      strcat(path_goicp, filesep, "demo", filesep, "config.txt"), ...
+                      strcat(path_goicp, filesep, "demo", filesep, "config_modified.txt"), ...
                       "data\temp\output.txt");
         system(cmd);
         % open output file
