@@ -7,8 +7,8 @@ path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
-path_ukf       = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
-path_goicp     = 'D:\Documents\MATLAB\GoICP_V1.3';
+path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_goicp     = 'D:\DennisChristie\Go-ICP\build';
 
 % add paths
 addpath(path_icpnormal);

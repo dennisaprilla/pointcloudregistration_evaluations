@@ -1,7 +1,7 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'cpd_trials1';
+filename = 'ukfnormal_trials2';
 load(strcat(filename,'.mat'));
 
 % renaming variables
@@ -61,12 +61,12 @@ end
 fig1 = figure('Name', 'Translation Error', 'Position', [0 0 1200 400]);
 for axis=1:total_poses
    
-    subaxis(1,4, axis, 'SpacingVertical',0, 'SpacingHorizontal', 0, 'MarginLeft', 0.09, 'MarginRight', 0); hold on;
+    subaxis(1,total_poses, axis, 'SpacingVertical',0, 'SpacingHorizontal', 0, 'MarginLeft', 0.09, 'MarginRight', 0); hold on;
     
     init_pose = axis;
     data_temp = data(1:3,init_pose)';
     label = {'tx', 'ty', 'tz'};
-    boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', {'0', '1', '2', '3'});   
+    boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', {'0', '0.5', '1', '1.5', '2', '2.5'});   
     grid on;
     
     if(init_pose==1)
@@ -89,12 +89,12 @@ saveas(fig1, sprintf('pictures/%s_abserror_trans', filename), 'png');
 fig2 = figure('Name', 'Rotation Error', 'Position', [0 0 1200 400]);
 for axis=1:total_poses
    
-    subaxis(1,4, axis, 'SpacingVertical',0, 'SpacingHorizontal', 0, 'MarginLeft', 0.09, 'MarginRight', 0); hold on;
+    subaxis(1,total_poses, axis, 'SpacingVertical',0, 'SpacingHorizontal', 0, 'MarginLeft', 0.09, 'MarginRight', 0); hold on;
     
     init_pose = axis;
     data_temp = data(6:-1:4,init_pose)';
     label = {'rx', 'ty', 'tz'};
-    boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', {'0', '1', '2', '3'});   
+    boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', {'0', '0.5', '1', '1.5', '2', '2.5'});   
     grid on;
     
     if(init_pose==1)
@@ -110,5 +110,5 @@ set(fig2,'Units','Inches');
 pos = get(fig2,'Position');
 set(fig2,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
 print(fig2, sprintf('pictures/%s_abserror_rots', filename),'-dpdf','-r0');
-saveas(fig1, sprintf('pictures/%s_abserror_rots', filename), 'png');
+saveas(fig2, sprintf('pictures/%s_abserror_rots', filename), 'png');
 %
