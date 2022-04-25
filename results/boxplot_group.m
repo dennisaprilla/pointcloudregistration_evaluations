@@ -1,7 +1,7 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'ukfnormal_trials2';
+filename = 'goicp_trials2';
 load(strcat(filename,'.mat'));
 
 % renaming variables
