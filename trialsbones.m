@@ -7,8 +7,8 @@ path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
-path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP\build';
+path_ukf       = 'C:\Users\ChristieDA\Documents\MATLAB\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_goicp     = 'C:\Users\ChristieDA\Documents\MATLAB\DennisChristie\GoICP_V1.3\demo';
 
 % add paths
 addpath(path_icpnormal);
@@ -90,7 +90,7 @@ noisenormal_const = 3;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'ukfnormal';
+description.algorithm  = 'ukf';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
@@ -271,8 +271,8 @@ while (trial <= n_trials)
         % UKF Registration
         [T_all, mean_dist, history] = ukf_isotropic_registration( U_noised', Y_breve', U_breve', ...
                                            'threshold', 0.0001, ...
-                                           'iteration', 200, ...
-                                           'expectednoise', 1.0*noise_point, ...
+                                           'iteration', 150, ...
+                                           'expectednoise', 1.2*noise_point, ...
                                            'sigmaxanneal', 0.98, ...
                                            'sigmaxtrans', 1.0*max_t, ...
                                            'sigmaxtheta', 1.0*max_theta, ...
