@@ -2,7 +2,7 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim2';
+path_amode  = 'data\bone\amode_accessible_sim1';
 path_result = 'results';
 
 % path to project
@@ -51,7 +51,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_tibia_30';
+filename_amodedata = 'amode_tibia_30_test';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -96,8 +96,8 @@ description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 2;
-point_number      = 30;
+trial_number      = 3;
+point_number      = 15;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
 GTs               = zeros(n_trials, 6, length(noises), length(init_poses));
