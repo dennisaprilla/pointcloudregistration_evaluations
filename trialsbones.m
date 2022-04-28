@@ -90,7 +90,7 @@ noisenormal_const = 3;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'ukfnormal';
+description.algorithm  = 'cpd';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;

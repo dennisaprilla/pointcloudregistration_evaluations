@@ -1,9 +1,9 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-sourcepath = 'backup\amode_normal\trials2';
+sourcepath = 'backup\amode_normal\trials3';
 resultpath = 'pictures';
-filename = 'goicp_trials2';
+filename = 'cpd_15_trials3';
 load(strcat(sourcepath, filesep, filename,'.mat'));
 
 % renaming variables
