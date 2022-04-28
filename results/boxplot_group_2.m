@@ -3,7 +3,7 @@ addpath(genpath('..\functions\display'));
 
 sourcepath = 'backup\amode_normal\trials2';
 resultpath = 'pictures';
-filename = 'goicp_trials2';
+filename = 'icp_trials2';
 load(strcat(sourcepath, filesep, filename,'.mat'));
 
 % renaming variables
@@ -14,10 +14,11 @@ total_noises = length(noises);
 
 % rearrange data, the requirement for boxplotGroup, please refer
 % https://www.mathworks.com/matlabcentral/answers/331381-how-do-you-create-a-grouped-boxplot-with-categorical-variables-on-the-x-axis#answer_418952
+selected_noises = [1, 3, 5];
 data = {};
 for init_pose=1:total_poses
     for dof=1:6
-        data{dof,init_pose} = reshape( abs(errors(:, dof, 1:total_noises, init_pose)), [], total_noises);
+        data{dof,init_pose} = reshape( abs(errors(:, dof, selected_noises, init_pose)), [], length(selected_noises));
     end
 end
 
@@ -48,8 +49,8 @@ for axis=(total_poses*2):-1:1
                       'BoxStyle', 'filled', 'Symbol', '.', 'MedianStyle', 'target');
         set(gca,'XTickLabel',[]);
     else
-        h = boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', arrayfun(@num2str, noises, 'UniformOutput', 0), ...
-                      'BoxStyle', 'filled', 'Symbol', '.', 'MedianStyle', 'target');
+        h = boxplotGroup( data_temp, 'PrimaryLabels', label, 'SecondaryLabels', arrayfun(@num2str, noises(selected_noises), 'UniformOutput', 0), ...
+                      'BoxStyle', 'filled', 'Symbol', '.', 'MedianStyle', 'target', 'Widths', 1);
     end
               
 	% beautification (lol wtf) the boxplot
@@ -82,14 +83,13 @@ for axis=(total_poses*2):-1:1
         title(sprintf('Initial Pose: %d', description.init_poses(init_pose)));
     end
 end
-% saveas(fig1, sprintf('pictures/%s_trans', filename), 'png');
-% save the picture
-% https://www.mathworks.com/matlabcentral/answers/12987-how-to-save-a-matlab-graphic-in-a-right-size-pdf
-set(fig1,'Units','Inches');
-pos = get(fig1,'Position');
-set(fig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
-print(fig1, strcat(resultpath, filesep, sprintf('%s_abserror', filename)), '-dpdf','-r0');
-saveas(fig1, strcat(resultpath, filesep, sprintf('%s_abserror', filename)), 'png');
+% % save the picture
+% % https://www.mathworks.com/matlabcentral/answers/12987-how-to-save-a-matlab-graphic-in-a-right-size-pdf
+% set(fig1,'Units','Inches');
+% pos = get(fig1,'Position');
+% set(fig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
+% print(fig1, strcat(resultpath, filesep, sprintf('%s_abserror', filename)), '-dpdf','-r0');
+% saveas(fig1, strcat(resultpath, filesep, sprintf('%s_abserror', filename)), 'png');
 
 %{
 % use this block if you want to display trans and rots in the diff figure
