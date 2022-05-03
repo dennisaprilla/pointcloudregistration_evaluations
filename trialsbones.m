@@ -85,6 +85,7 @@ end
 
 %% Simulation Config
 
+noisetype         = 'isotropic_gaussian';
 noises            = [1.0, 1.5, 2.0, 2.5];
 noisenormal_const = 2;
 init_poses        = [3 5 8 10];
@@ -128,8 +129,11 @@ while (trial <= n_trials)
 
     % % add isotropic zero-mean gaussian noise to U, simulating noise measurement
     % % uncomment this block if you want to use standard deviation for noise
-    % random_point   = -(noise_point) + 2*(noise_point) * rand(size(U, 1), 3);
-    random_point   = mvnrnd( [0 0 0], eye(3)*noise_point, size(U, 1));
+    if (strcmp(noisetype, 'uniform'))
+        random_point   = -(noise_point) + 2*(noise_point) * rand(size(U, 1), 3);
+    elseif (strcmp(noisetype, 'isotropic_gaussian'))
+        random_point   = mvnrnd( [0 0 0], eye(3)*noise_point, size(U, 1));
+    end
     U_noised       = U + random_point;
     
     % if the algorithm specified by user is using normal, we provide the
@@ -137,8 +141,11 @@ while (trial <= n_trials)
     if (strcmp(description.algorithm, 'ukfnormal') || strcmp(description.algorithm, 'icpnormal'))
         U_hat_noised = [];
         for i=1:size(U_hat,1)
-            % random_normal = -noise_normal + 2*noise_normal * rand(1, 3);
-            random_normal   = mvnrnd( [0 0 0], eye(3)*noise_normal, size(U_hat, 1));
+            if (strcmp(noisetype, 'uniform'))
+                random_normal = -noise_normal + 2*noise_normal * rand(1, 3);
+            elseif (strcmp(noisetype, 'isotropic_gaussian'))
+                random_normal   = mvnrnd( [0 0 0], eye(3)*noise_normal, size(U_hat, 1));
+            end
             random_R      = eul2rotm(deg2rad(random_normal), 'ZYX');
             U_hat_noised  = [U_hat_noised; (random_R * U_hat(i,:)')'];
         end
