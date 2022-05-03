@@ -1,2 +1,2 @@
 this simulation is using amode_accessible_sim1
-noise is big [0 1 2 3] with double range.
+noise is big [0 1 2 3] standard deviation.

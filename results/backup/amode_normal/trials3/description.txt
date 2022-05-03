@@ -1,2 +1,0 @@
-This trials is using uniform distribution in range +/-0.5, 1, 1.5, 2, 2.5
-and using the amode_accessible_sim1
