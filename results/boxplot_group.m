@@ -3,7 +3,7 @@ addpath(genpath('..\functions\display'));
 
 sourcepath = 'backup\amode_normal\trials3';
 resultpath = 'pictures';
-filename = 'cpd_15_trials3';
+filename = 'ukfnormal_15_trials3';
 load(strcat(sourcepath, filesep, filename,'.mat'));
 
 % renaming variables
