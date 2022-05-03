@@ -9,12 +9,10 @@ addpath(genpath('..\functions\display'));
 sourcepath = 'backup\amode_normal\trials2';
 resultpath = 'pictures';
 % specify the filenames and the name of the algorithm
-filenames  = {'icp_trials2', 'cpd_trials2', 'ukf_trials2', 'icpnormal_trials2', 'ukfnormal_15_trials2'};
-alg_names  = {'ICP', 'CPD', 'UKF', 'ICP+norm', 'UKF+norm'};
+filenames  = {'ukfnormal_15_trials2', 'ukfnormal_20_trials2', 'ukfnormal_25_trials2', 'ukfnormal_30_trials2'};
+alg_names  = {'15', '20', '25', '30'};
 % for visualization purpose
-% orange, green, yellow, red, blue
-%color_palette = {'#ffa502', '#2ed573', '#eccc68', '#ff4757', '#70a1ff'};
-color_palette = {'#eccc68', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
+colorpalette = {'#eccc68', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
 
 % storing some variable
 total_algorithms = length(filenames);
@@ -34,7 +32,7 @@ for filename_idx=1:total_algorithms
     init_poses_sel   = 4;
     noises           = description.noises;
     total_noises     = length(noises);
-    noises_sel       = [1, 3, 5];
+    noises_sel       = [2, 3, 4, 5];
     total_noises_sel = length(noises_sel);
     
     for dof_idx=1:total_dof
@@ -47,8 +45,11 @@ data = data';
 
 % set this to true if you want to see all of the transformation, set false
 % if you want to see only the tz and Rz
-all_transformation = true;
+all_transformation = false;
 save_picture = true;
+% limit error to visualized
+ymax = 8;
+yticks = (1:1:ymax);
 
 if (all_transformation)
 
@@ -86,9 +87,10 @@ if (all_transformation)
         % coloring the box plot
         start_boxelement = (length(h.axis.Children) - total_algorithms)+1;
         end_boxelement   = length(h.axis.Children);
-        for element = start_boxelement : end_boxelement
-            color_pallete_idx = (element - start_boxelement) + 1;
-            set(h.axis.Children(element).Children,'Color', color_palette{color_pallete_idx});
+        colorpallete_idx = length(colorpalette);
+        for element = end_boxelement:-1:start_boxelement
+            set(h.axis.Children(element).Children,'Color', colorpalette{colorpallete_idx});
+            colorpallete_idx = colorpallete_idx-1;
         end
 
         % coloring the dots (median and outliers)
@@ -122,8 +124,8 @@ if (all_transformation)
 else
     
     titles     = {'t_z absolute error (mm)', 'R_z absolute error  (deg)'};
-    outputname = { sprintf('allalg_tz_initpose%d_abserror', init_poses(init_poses_sel)) , ...
-                   sprintf('allalg_rz_initpose%d_abserror', init_poses(init_poses_sel)) };
+    outputname = { sprintf('allukf_tz_initpose%d_abserror', init_poses(init_poses_sel)) , ...
+                   sprintf('allukf_rz_initpose%d_abserror', init_poses(init_poses_sel)) };
         
     start_dofidx = 3;
     end_dofidx   = 4;
@@ -131,7 +133,7 @@ else
     
         % we use subaxis function to control more for the spacing for the subplot
         % https://www.mathworks.com/matlabcentral/fileexchange/3696-subaxis-subplot
-        fig1 = figure('Name', 'Error distribution', 'Position', [0 0 500 500]);
+        fig1 = figure('Name', 'Error distribution', 'Position', [0 0 500 300]);
         subaxis( 1,1, 1, ...
                  'SpacingVertical',0.15, 'SpacingHorizontal', 0.05, ...
                  'MarginLeft', 0.05, 'MarginRight', 0.01, 'MarginTop', 0.025);
@@ -151,9 +153,12 @@ else
         % coloring the box plot
         start_boxelement = (length(h.axis.Children) - total_algorithms)+1;
         end_boxelement   = length(h.axis.Children);
-        for element = start_boxelement : end_boxelement
-            color_pallete_idx = (element - start_boxelement) + 1;
-            set(h.axis.Children(element).Children,'Color', color_palette{color_pallete_idx});
+        colorpallete_idx = length(colorpalette);
+        % for element = start_boxelement : end_boxelement
+        for element = end_boxelement:-1:start_boxelement
+            % color_pallete_idx = (element - start_boxelement) + 1;
+            set(h.axis.Children(element).Children,'Color', colorpalette{colorpallete_idx});
+            colorpallete_idx = colorpallete_idx-1;
         end
 
         % coloring the dots (median and outliers)
@@ -166,9 +171,8 @@ else
         grid on;
 
         % limit the y_axis
-        ymax = 15;
         ylim([0, ymax]);
-        set(gca,'YTick',(1:2:ymax));
+        set(gca,'YTick',yticks);
 
         % set the title
         % prepare the subaxis

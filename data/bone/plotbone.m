@@ -36,8 +36,8 @@ grid on; axis equal; hold on;
 %        'or', 'MarkerFaceColor', 'r', ...
 %        'Tag', 'plot_bone_full');
 
-filename = 'amode_tibia_15_test';
-path = 'amode_accessible_sim1';
+filename = 'amode_tibia_15';
+path = 'amode_accessible_sim2';
 load(strcat(path, filesep, filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
