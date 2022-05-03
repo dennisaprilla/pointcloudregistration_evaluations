@@ -15,7 +15,7 @@ addpath(path_icpnormal);
 addpath(path_ukf);
 %addpath(path_goicp);
 
-displaybone = true;
+displaybone = false;
 
 %% Prepare the bone point cloud
 
@@ -86,18 +86,18 @@ end
 %% Simulation Config
 
 noisetype         = 'isotropic_gaussian';
-noises            = [1.0, 1.5, 2.0, 2.5];
+noises            = [0 0.5 1.0 2.0, 2.5];
 noisenormal_const = 2;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'goicp';
+description.algorithm  = 'cpd';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 2;
+trial_number      = 4;
 point_number      = 15;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
@@ -144,7 +144,7 @@ while (trial <= n_trials)
             if (strcmp(noisetype, 'uniform'))
                 random_normal = -noise_normal + 2*noise_normal * rand(1, 3);
             elseif (strcmp(noisetype, 'isotropic_gaussian'))
-                random_normal   = mvnrnd( [0 0 0], eye(3)*noise_normal, size(U_hat, 1));
+                random_normal   = mvnrnd( [0 0 0], eye(3)*noise_normal, 1);
             end
             random_R      = eul2rotm(deg2rad(random_normal), 'ZYX');
             U_hat_noised  = [U_hat_noised; (random_R * U_hat(i,:)')'];
