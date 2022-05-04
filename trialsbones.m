@@ -15,7 +15,7 @@ addpath(path_icpnormal);
 addpath(path_ukf);
 %addpath(path_goicp);
 
-displaybone = false;
+displaybone = true;
 
 %% Prepare the bone point cloud
 
@@ -85,19 +85,19 @@ end
 
 %% Simulation Config
 
-noisetype         = 'isotropic_gaussian';
+noisetype         = 'uniform';
 noises            = [0 0.5 1.0 2.0, 2.5];
 noisenormal_const = 2;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'ukf';
+description.algorithm  = 'ukfnormal';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 4;
+trial_number      = 6;
 point_number      = 15;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
