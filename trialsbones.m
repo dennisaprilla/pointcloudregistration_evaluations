@@ -2,7 +2,7 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim4';
+path_amode  = 'data\bone\amode_accessible_sim3';
 path_result = 'results';
 
 % path to project
