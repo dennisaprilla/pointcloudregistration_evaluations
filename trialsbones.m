@@ -7,8 +7,8 @@ path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
-path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP\build';
+path_ukf       = 'C:\Users\ChristieDA\Documents\MATLAB\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_goicp     = 'D:\DennisChristie\Go-ICP';
 
 % add paths
 addpath(path_icpnormal);
@@ -51,7 +51,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_tibia_15_conf3';
+filename_amodedata = 'amode_tibia_15_conf2';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
