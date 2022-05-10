@@ -2,7 +2,7 @@ close all; clear all;
 addpath('..\..\functions\geometry');
 
 % read the point cloud (bone) from STL/PLY file
-ptCloud          = stlread('data/bone/CT_Tibia_R.stl');
+ptCloud          = stlread('data/bone/CT_Femur_R.stl');
 ptCloud_scale    = 1000;
 ptCloud_Npoints  = size(ptCloud.Points,1);
 ptCloud_centroid = mean(ptCloud.Points, 1);
@@ -25,7 +25,8 @@ plot3( axes1, ...
 xlabel(axes1, 'X'); ylabel(axes1, 'Y'); zlabel(axes1, 'Z');
 grid(axes1, 'on'); axis(axes1, 'equal'); hold(axes1, 'on');
 
-n_step    = 30;
+% n_step    = 30;
+n_step    = 40;
 z_steps   = linspace(max(U_breve(:,3)), min(U_breve(:,3)), n_step+2);
 z_planes  = [ repmat( [ 0 0 1 ], n_step, 1), z_steps(2:end-1)' ];
 threshold = 0.00075;
@@ -33,11 +34,12 @@ threshold = 0.00075;
 
 figure2 = figure('Name', 'Slices');
 figure2.WindowState = 'maximized';
-subplot_axes = [1,2,3,4,5 6,7,8,9,10,  11,12,13];
+% subplot_axes = [1,2,3,4,5,  6,7,8,9,10,  11,12,13];
+subplot_axes = [1,2,3,4,  10,11,12,13,14,15,16,17,18  19,20,21,22,23];
 subplot_idx  = 1;
 
 % z_plane_selection = [2,3,4,  6,8,10,12,14,  18,19];
-z_plane_selection = [2,3,4,5,6,  10,12,14,16,18,  27,28,29];
+z_plane_selection = [2,3,4,5,  14,16,18,20,22,24,26,28,30, 36,37,38,39,40];
 
 for i=1:length(z_plane_selection)
     
@@ -54,7 +56,7 @@ for i=1:length(z_plane_selection)
            '.r', 'MarkerSize', 0.1, ...
            'Tag', 'plot_selectedUbreve');
        
-	axes2 = subplot(3, 5, subplot_axes(subplot_idx), 'Parent', figure2);
+	axes2 = subplot(3, 9, subplot_axes(subplot_idx), 'Parent', figure2);
     plot3( axes2, ...
            selected_U_breve(:,1), ...
            selected_U_breve(:,2), ...
