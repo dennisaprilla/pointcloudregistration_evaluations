@@ -2,12 +2,12 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim3';
+path_amode  = 'data\bone\amode_accessible_sim2';
 path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
-path_ukf       = 'C:\Users\ChristieDA\Documents\MATLAB\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
 path_goicp     = 'D:\DennisChristie\Go-ICP';
 
 % add paths
@@ -51,7 +51,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_tibia_15_conf2';
+filename_amodedata = 'amode_tibia_15';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -91,13 +91,13 @@ noisenormal_const = 2;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'ukfnormal';
+description.algorithm  = 'ukf';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 6;
+trial_number      = 3;
 point_number      = 15;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
