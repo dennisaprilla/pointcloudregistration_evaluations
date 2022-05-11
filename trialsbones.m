@@ -2,13 +2,13 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim2';
+path_amode  = 'data\bone\amode_accessible_sim1';
 path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
 path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP';
+path_goicp     = 'D:\DennisChristie\Go-ICP\build';
 
 % add paths
 addpath(path_icpnormal);
@@ -51,7 +51,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_tibia_15';
+filename_amodedata = 'amode_tibia_15_test';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -86,12 +86,12 @@ end
 %% Simulation Config
 
 noisetype         = 'uniform';
-noises            = [0 0.5 1.0 2.0, 2.5];
+noises            = [0, 0.5, 1.0, 1.5, 2.0, 2.5];
 noisenormal_const = 2;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'ukf';
+description.algorithm  = 'goicp';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
@@ -338,12 +338,12 @@ while (trial <= n_trials)
         data = temp(1:size(U_noised, 1), :);
         model = temp(size(U_noised, 1)+1:end, :);
         % store data.txt
-        fileID = fopen('data\temp\data.txt','w');
+        fileID = fopen('data\temp\data.txt','w+');
         fprintf(fileID,'%d\n', size(data, 1));
         fprintf(fileID,'%f %f %f\n', data');
         fclose(fileID);
         % store model.txt
-        fileID = fopen('data\temp\model.txt','w');
+        fileID = fopen('data\temp\model.txt','w+');
         fprintf(fileID,'%d\n',  size(model, 1));
         fprintf(fileID,'%f %f %f\n', model');
         fclose(fileID); 
