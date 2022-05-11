@@ -2,7 +2,7 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim2';
+path_amode  = 'data\bone\amode_accessible_sim1';
 path_result = 'results';
 
 % path to project
@@ -338,12 +338,12 @@ while (trial <= n_trials)
         data = temp(1:size(U_noised, 1), :);
         model = temp(size(U_noised, 1)+1:end, :);
         % store data.txt
-        fileID = fopen('data\temp\data.txt','w');
+        fileID = fopen('data\temp\data.txt','w+');
         fprintf(fileID,'%d\n', size(data, 1));
         fprintf(fileID,'%f %f %f\n', data');
         fclose(fileID);
         % store model.txt
-        fileID = fopen('data\temp\model.txt','w');
+        fileID = fopen('data\temp\model.txt','w+');
         fprintf(fileID,'%d\n',  size(model, 1));
         fprintf(fileID,'%f %f %f\n', model');
         fclose(fileID); 
