@@ -32,7 +32,7 @@ for filename_idx=1:total_algorithms
     init_poses_sel   = 4;
     noises           = description.noises;
     total_noises     = length(noises);
-    noises_sel       = [2, 3, 4, 5];
+    noises_sel       = [1, 2, 3, 4];
     total_noises_sel = length(noises_sel);
     
     for dof_idx=1:total_dof

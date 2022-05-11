@@ -15,7 +15,7 @@ addpath(path_icpnormal);
 addpath(path_ukf);
 %addpath(path_goicp);
 
-displaybone = true;
+displaybone = false;
 
 %% Prepare the bone point cloud
 
@@ -51,7 +51,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_femur_15';
+filename_amodedata = 'amode_femur_30';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -86,19 +86,19 @@ end
 %% Simulation Config
 
 noisetype         = 'uniform';
-noises            = [0, 0.5, 1.0, 1.5, 2.0, 2.5];
+noises            = [0.5 1.0 1.5 2.0];
 noisenormal_const = 2;
-init_poses        = [3 5 8 10];
+init_poses        = [10];
 n_trials          = 100;
 
-description.algorithm  = 'icp';
+description.algorithm  = 'ukfnormal';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 3;
-point_number      = 15;
+trial_number      = 1;
+point_number      = 30;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
 GTs               = zeros(n_trials, 6, length(noises), length(init_poses));
