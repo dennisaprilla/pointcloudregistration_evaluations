@@ -7,8 +7,8 @@ path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
-path_ukf       = 'D:\Documents\BELANDA\PhD Thesis\Code\MATLAB\kalman_filter\kalmanfilter_registration_fixed\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP';
+path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_goicp     = 'D:\DennisChristie\Go-ICP\build';
 
 % add paths
 addpath(path_icpnormal);
@@ -51,7 +51,11 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
+<<<<<<< HEAD
+filename_amodedata = 'amode_tibia_15_test';
+=======
 filename_amodedata = 'amode_femur_15';
+>>>>>>> 9b81f8e1114b62383ca0052224a1ca7d1f7bfe4f
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -91,7 +95,11 @@ noisenormal_const = 2;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
+<<<<<<< HEAD
+description.algorithm  = 'goicp';
+=======
 description.algorithm  = 'icp';
+>>>>>>> 9b81f8e1114b62383ca0052224a1ca7d1f7bfe4f
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;

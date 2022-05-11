@@ -1,7 +1,7 @@
 close all; clear; clc;
 
 % read the point cloud (bone) from STL/PLY file
-ptCloud          = stlread('data/bone/CT_Tibia_R.stl');
+ptCloud          = stlread('data/bone/CT_Femur_R.stl');
 ptCloud_scale    = 1000;
 ptCloud_Npoints  = size(ptCloud.Points,1);
 ptCloud_centroid = mean(ptCloud.Points, 1);
@@ -36,8 +36,8 @@ grid on; axis equal; hold on;
 %        'or', 'MarkerFaceColor', 'r', ...
 %        'Tag', 'plot_bone_full');
 
-filename = 'amode_tibia_15';
-path = 'amode_accessible_sim2';
+filename = 'amode_femur_15_conf3';
+path = 'amode_accessible_sim3';
 load(strcat(path, filesep, filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
@@ -46,7 +46,7 @@ plot3( axes1, ...
        U(:,3), ...
        'or', 'MarkerFaceColor', 'r', ...
        'Tag', 'plot_bone_full');
-   
+%    
 % % save picture to pdf
 % % https://www.mathworks.com/matlabcentral/answers/12987-how-to-save-a-matlab-graphic-in-a-right-size-pdf
 % set(figure1,'Units','Inches');
