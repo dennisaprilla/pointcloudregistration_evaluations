@@ -36,8 +36,8 @@ grid on; axis equal; hold on;
 %        'or', 'MarkerFaceColor', 'r', ...
 %        'Tag', 'plot_bone_full');
 
-filename = 'amode_femur_15';
-path = 'amode_accessible_sim2';
+filename = 'amode_femur_15_conf3';
+path = 'amode_accessible_sim3';
 load(strcat(path, filesep, filename, '.mat'));
 U = vertcat(amode_all.Position);
 plot3( axes1, ...
