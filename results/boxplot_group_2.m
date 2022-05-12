@@ -6,11 +6,13 @@ clear; close all;
 addpath(genpath('..\functions\display'));
 
 % specify source
-sourcepath = 'backup\amode_new\trials2';
-resultpath = 'pictures\tibia\sensitivity_pointnumber';
+sourcepath = 'backup\amode_new\tibia\trials6';
+resultpath = 'pictures\tibia\sensitivity_pointconfig';
 % specify the filenames and the name of the algorithm
-filenames  = {'ukfnormal_15_trials2', 'ukfnormal_20_trials2', 'ukfnormal_25_trials2', 'ukfnormal_30_trials2'};
-alg_names  = {'15', '20', '25', '30'};
+% filenames  = {'ukfnormal_15_trials2', 'ukfnormal_20_trials2', 'ukfnormal_25_trials2', 'ukfnormal_30_trials2'};
+% alg_names  = {'15', '20', '25', '30'};
+filenames  = {'ukfnormal_15_conf1_trials6', 'ukfnormal_15_conf2_trials6', 'ukfnormal_15_conf3_trials6'};
+alg_names  = {'Config 1', 'Config 2', 'Config 3'};
 % for visualization purpose
 colorpalette = {'#eccc68', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
 
@@ -48,7 +50,7 @@ data = data';
 all_transformation = false;
 save_picture = true;
 % limit error to visualized
-ymax = 5;
+ymax = 10;
 yticks = (1:1:ymax);
 
 if (all_transformation)
