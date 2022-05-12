@@ -6,15 +6,19 @@ clear; close all;
 addpath(genpath('..\functions\display'));
 
 % specify source
-sourcepath = 'backup\amode_new\tibia\trials6';
-resultpath = 'pictures\tibia\sensitivity_pointconfig';
+sourcepath = 'backup\amode_new\tibia\trials3';
+resultpath = 'pictures\tibia\algorithm_comparison';
+
 % specify the filenames and the name of the algorithm
 % filenames  = {'ukfnormal_15_trials2', 'ukfnormal_20_trials2', 'ukfnormal_25_trials2', 'ukfnormal_30_trials2'};
 % alg_names  = {'15', '20', '25', '30'};
-filenames  = {'ukfnormal_15_conf1_trials6', 'ukfnormal_15_conf2_trials6', 'ukfnormal_15_conf3_trials6'};
-alg_names  = {'Config 1', 'Config 2', 'Config 3'};
+% filenames  = {'icp_15_trials2', 'cpd_15_trials2', 'ukf_15_trials2', 'goicp_15_trials2_b', 'icpnormal_15_trials2', 'ukfnormal_15_trials2'};
+% alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'ICP+norm', 'UKF+norm'};
+filenames  = {'icp_15_trials3', 'cpd_15_trials3', 'ukf_15_trials3', 'goicp_15_trials3', 'ukfnormal_15_trials3'};
+alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'UKF+norm'};
+
 % for visualization purpose
-colorpalette = {'#eccc68', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
+colorpalette = {'#57606f', '#5352ed', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
 
 % storing some variable
 total_algorithms = length(filenames);
@@ -34,12 +38,13 @@ for filename_idx=1:total_algorithms
     init_poses_sel   = 4;
     noises           = description.noises;
     total_noises     = length(noises);
-    noises_sel       = [2, 3, 4, 5];
+    noises_sel       = [1, 3, 5];
     total_noises_sel = length(noises_sel);
     
     for dof_idx=1:total_dof
         data{filename_idx, dof_idx} = reshape( abs( errors(:, dof_idx, noises_sel, init_poses_sel )), [], total_noises_sel);
     end
+    
 end
 data = data';
 
@@ -47,8 +52,8 @@ data = data';
 
 % set this to true if you want to see all of the transformation, set false
 % if you want to see only the tz and Rz
-all_transformation = false;
-save_picture = true;
+all_transformation = true;
+save_picture       = false;
 % limit error to visualized
 ymax = 10;
 yticks = (1:1:ymax);
@@ -57,7 +62,7 @@ if (all_transformation)
 
     % we use subaxis function to control more for the spacing for the subplot
     % https://www.mathworks.com/matlabcentral/fileexchange/3696-subaxis-subplot
-    fig1   = figure('Name', 'Error distribution', 'Position', [0 0 1000 600]);
+    fig1   = figure('Name', 'Error distribution', 'Position', [0 0 1200 600]);
     titles = {'Error distribution t_x (mm)', 'Error distribution t_y (mm)', 'Error distribution t_z (mm)', ...
               'Error distribution R_x (deg)', 'Error distribution R_y (deg)', 'Error distribution R_z (deg)'};
     for dof_idx=1:total_dof
