@@ -14,8 +14,8 @@ resultpath = 'pictures\tibia\algorithm_comparison';
 % alg_names  = {'15', '20', '25', '30'};
 % filenames  = {'icp_15_trials2', 'cpd_15_trials2', 'ukf_15_trials2', 'goicp_15_trials2_b', 'icpnormal_15_trials2', 'ukfnormal_15_trials2'};
 % alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'ICP+norm', 'UKF+norm'};
-filenames  = {'icp_15_trials3', 'cpd_15_trials0', 'ukf_15_trials3', 'goicp_15_trials3', 'ukfnormal_15_trials3'};
-alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'UKF+norm'};
+filenames  = {'icp_15_trials3', 'cpd_15_trials0', 'ukf_15_trials3', 'goicp_15_trials3', 'icpnormal_15_trials3', 'ukfnormal_15_trials3'};
+alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'ICP+norm', 'UKF+norm'};
 
 % for visualization purpose
 colorpalette = {'#57606f', '#5352ed', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
@@ -71,7 +71,7 @@ data = data';
 % set this to true if you want to see all of the transformation, set false
 % if you want to see only the tz and Rz
 all_transformation = true;
-save_picture       = false;
+save_picture       = true;
 % limit error to visualized
 ymax = 10;
 yticks = (1:1:ymax);
@@ -80,14 +80,14 @@ if (all_transformation)
 
     % we use subaxis function to control more for the spacing for the subplot
     % https://www.mathworks.com/matlabcentral/fileexchange/3696-subaxis-subplot
-    fig1   = figure('Name', 'Error distribution', 'Position', [0 0 1200 600]);
+    fig1   = figure('Name', 'Error distribution', 'Position', [0 0 1200 700]);
     titles = {'Error distribution t_x (mm)', 'Error distribution t_y (mm)', 'Error distribution t_z (mm)', ...
               'Error distribution R_x (deg)', 'Error distribution R_y (deg)', 'Error distribution R_z (deg)'};
     for dof_idx=1:total_dof
 
         % prepare the subaxis
         subaxis( 2,3, dof_idx, ...
-                 'SpacingVertical',0.13, 'SpacingHorizontal', 0.05, ...
+                 'SpacingVertical',0.15, 'SpacingHorizontal', 0.05, ...
                  'MarginLeft', 0, 'MarginRight', 0, 'MarginTop', 0.05);
         hold on;
 
