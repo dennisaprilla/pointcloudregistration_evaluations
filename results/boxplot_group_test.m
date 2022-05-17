@@ -71,7 +71,7 @@ data = data';
 % set this to true if you want to see all of the transformation, set false
 % if you want to see only the tz and Rz
 all_transformation = true;
-save_picture       = true;
+save_picture       = false;
 % limit error to visualized
 ymax = 10;
 yticks = (1:1:ymax);

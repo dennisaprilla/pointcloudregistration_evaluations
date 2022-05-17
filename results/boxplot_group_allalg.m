@@ -6,39 +6,109 @@ clear; close all;
 addpath(genpath('..\functions\display'));
 
 % specify source
-sourcepath = 'backup\amode_new\tibia\trials3';
-resultpath = 'pictures\tibia\algorithm_comparison';
+sourcepath     = 'backup\amode_new';
+% specify output folder
+resultpath     = 'pictures';
 
-% specify the filenames and the name of the algorithm
-% filenames  = {'ukfnormal_15_trials2', 'ukfnormal_20_trials2', 'ukfnormal_25_trials2', 'ukfnormal_30_trials2'};
-% alg_names  = {'15', '20', '25', '30'};
-% filenames  = {'icp_15_trials2', 'cpd_15_trials2', 'ukf_15_trials2', 'goicp_15_trials2_b', 'icpnormal_15_trials2', 'ukfnormal_15_trials2'};
-% alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'ICP+norm', 'UKF+norm'};
-filenames  = {'icp_15_trials3', 'cpd_15_trials3', 'ukf_15_trials3', 'goicp_15_trials3', 'ukfnormal_15_trials3'};
-alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'UKF+norm'};
+% if you want to compare all algorithm, use 'compare_alg'
+% if you want to compare point numbers, use 'compare_point'
+% if you want to compare point configuration, use 'compare_config'
+display_config = 'compare_config';
+bone           = 'tibia';
+trialname      = 'trials6';
+% save picture?
+save_picture   = true;
+% limit error to visualized
+ymax           = 10;
+yticks         = (1:1:ymax);
+
+% compare algorithm will show all 6 DoF
+if(strcmp(display_config, 'compare_alg'))
+	% specify source details
+    sourcefullpath = strcat(sourcepath, filesep, bone, filesep, trialname);
+    % specify source files
+    filenames  = { sprintf('%s_%d_%s', 'icp', 15, trialname), ...
+                   sprintf('%s_%d_%s', 'cpd', 15, trialname), ...
+                   sprintf('%s_%d_%s', 'ukf', 15, trialname), ...
+                   sprintf('%s_%d_%s', 'goicp', 15, trialname), ...
+                   sprintf('%s_%d_%s', 'icpnormal', 15, trialname), ...
+                   sprintf('%s_%d_%s', 'ukfnormal', 15, trialname) };
+    alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'ICP+norm', 'UKF+norm'};
+    
+    % specify output folder details
+    outputcategory = 'algorithm_comparison';
+    resultfullpath = strcat(resultpath, filesep, bone, filesep, outputcategory);
+    % specify output files
+    outputname     = sprintf('%s_%s_tz_abserror', 'allalg', bone);
+    
+    
+    
+% compare point will show only tz and Rz
+elseif(strcmp(display_config, 'compare_point'))
+	% specify source details
+    sourcefullpath = strcat(sourcepath, filesep, bone, filesep, trialname);
+    % specify source files
+    alg_used   = 'ukfnormal';
+    filenames  = { sprintf('%s_%d_%s', alg_used, 15, trialname), ...
+                   sprintf('%s_%d_%s', alg_used, 20, trialname), ...
+                   sprintf('%s_%d_%s', alg_used, 25, trialname), ...
+                   sprintf('%s_%d_%s', alg_used, 30, trialname) };
+    alg_names  = {'15', '20', '25', '30'};    
+
+    % specify output folder details
+    outputcategory = 'sensitivity_pointnumber';
+    resultfullpath = strcat(resultpath, filesep, bone, filesep, outputcategory);
+    % specify output files
+    modename       = 'point';
+    displayname    = sprintf('all%s', alg_used);
+    outputname     = { sprintf('%s_%s_%s_tz_abserror', displayname, bone, modename), ...
+                       sprintf('%s_%s_%s_rz_abserror', displayname, bone, modename) };
+                   
+                   
+    
+% compare config will show only tz and Rz
+else
+	% specify source details
+    sourcefullpath = strcat(sourcepath, filesep, bone, filesep, trialname);
+    % specify source files
+    alg_used   = 'ukfnormal';
+    filenames  = { sprintf('%s_%d_conf%d_%s', alg_used, 15, 1, trialname), ...
+                   sprintf('%s_%d_conf%d_%s', alg_used, 15, 2, trialname), ...
+                   sprintf('%s_%d_conf%d_%s', alg_used, 15, 3, trialname)};
+    alg_names  = {'Config 1', 'Config 2', 'Config 3'};
+   
+    % specify output folder details
+    outputcategory = 'sensitivity_pointconfig';
+    resultfullpath = strcat(resultpath, filesep, bone, filesep, outputcategory);
+    % specify output files
+    modename       = 'config';
+    displayname    = sprintf('all%s', alg_used);
+    outputname     = { sprintf('%s_%s_%s_tz_abserror', displayname, bone, modename), ...
+                       sprintf('%s_%s_%s_rz_abserror', displayname, bone, modename) };
+end
 
 % for visualization purpose
 colorpalette = {'#57606f', '#5352ed', '#70a1ff', '#2ed573', '#ffa502', '#ff4757'};
+
+%% Preparing Data
 
 % storing some variable
 total_algorithms = length(filenames);
 total_dof        = 6;
 
-%% Preparing Data
-
 % rearrange data, the requirement for boxplotGroup, please refer
 % https://www.mathworks.com/matlabcentral/answers/331381-how-do-you-create-a-grouped-boxplot-with-categorical-variables-on-the-x-axis#answer_418952
 data = {};
 for filename_idx=1:total_algorithms
-    load(strcat(sourcepath, filesep, filenames{filename_idx},'.mat'));
+    load(strcat(sourcefullpath, filesep, filenames{filename_idx},'.mat'));
     
     % renaming variables
     init_poses       = description.init_poses;
     total_poses      = length(init_poses);
-    init_poses_sel   = 4;
+    init_poses_sel   = 1;
     noises           = description.noises;
     total_noises     = length(noises);
-    noises_sel       = [1, 3, 5];
+    noises_sel       = [2, 3, 4, 5];
     total_noises_sel = length(noises_sel);
     
     for dof_idx=1:total_dof
@@ -50,15 +120,7 @@ data = data';
 
 %% Visualization
 
-% set this to true if you want to see all of the transformation, set false
-% if you want to see only the tz and Rz
-all_transformation = true;
-save_picture       = false;
-% limit error to visualized
-ymax = 10;
-yticks = (1:1:ymax);
-
-if (all_transformation)
+if (strcmp(display_config, 'compare_alg'))
 
     % we use subaxis function to control more for the spacing for the subplot
     % https://www.mathworks.com/matlabcentral/fileexchange/3696-subaxis-subplot
@@ -124,15 +186,13 @@ if (all_transformation)
         set(fig1,'Units','Inches');
         pos = get(fig1,'Position');
         set(fig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
-        print(fig1, strcat(resultpath, filesep, sprintf('allalg_allT_initpose%d_abserror', init_poses(init_poses_sel))), '-dpdf','-r0');
-        saveas(fig1, strcat(resultpath, filesep, sprintf('allalg_allT_initpose%d_abserror', init_poses(init_poses_sel))), 'png');
+        print(fig1, strcat(resultfullpath, filesep, outputname), '-dpdf','-r0');
+        saveas(fig1, strcat(resultfullpath, filesep, outputname), 'png');
     end
 
 else
     
     titles     = {'t_z absolute error (mm)', 'R_z absolute error  (deg)'};
-    outputname = { sprintf('allukf_tz_initpose%d_abserror', init_poses(init_poses_sel)) , ...
-                   sprintf('allukf_rz_initpose%d_abserror', init_poses(init_poses_sel)) };
         
     start_dofidx = 3;
     end_dofidx   = 4;
@@ -174,8 +234,35 @@ else
         median_obj = findobj(gcf, 'Tag', 'MedianInner');
         set(median_obj, 'MarkerEdgeColor', 'r');
         outlier_obj = findobj(gcf, 'Tag', 'Outliers');
-        set(outlier_obj, 'MarkerEdgeColor', [0.3412, 0.3961, 0.4549]); 
-        grid on;
+        set(outlier_obj, 'MarkerEdgeColor', [0.3412, 0.3961, 0.4549]);
+        whisker_obj = findobj(gcf, 'Tag', 'Whisker');
+        grid on; hold on;
+        
+        % line plot the median
+        total_noises  = total_noises_sel;
+        total_configs = size(data_temp, 2);
+        median_lines  = zeros(total_noises, 2, total_configs);
+        upperwhisker_lines  = zeros(total_noises, 2, total_configs);
+        lowerwhisker_lines  = zeros(total_noises, 2, total_configs);
+        boxplot_median_idx = 1;
+        for i=1:total_configs
+            for j=1:total_noises
+                median_lines(j,:,i)        = [median_obj(boxplot_median_idx).XData, median_obj(boxplot_median_idx).YData];
+                lowerwhisker_lines(j,:,i)  = [whisker_obj(boxplot_median_idx).XData(1), whisker_obj(boxplot_median_idx).YData(1)];
+                upperwhisker_lines(j,:,i)  = [whisker_obj(boxplot_median_idx).XData(2), whisker_obj(boxplot_median_idx).YData(2)];
+                boxplot_median_idx = boxplot_median_idx+1;
+            end
+        end
+        for i=1:size(median_lines, 1)
+            plot( squeeze(median_lines(i,1,:)), squeeze(median_lines(i,2,:)), '-r' );
+            
+            x  = squeeze(lowerwhisker_lines(i,1,:));
+            y1 = squeeze(lowerwhisker_lines(i,2,:));
+            y2 = squeeze(upperwhisker_lines(i,2,:));
+            where = x>=x(end) & x<=x(1);
+            opts  = {'FaceColor', '#a4b0be', 'FaceAlpha', .2, 'LineStyle', 'none',};
+            fill_between( x, y1, y2, where, opts{:} );
+        end        
 
         % limit the y_axis
         ylim([0, ymax]);
@@ -192,8 +279,8 @@ else
             set(fig1,'Units','Inches');
             pos = get(fig1,'Position');
             set(fig1,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]);
-            print(fig1, strcat(resultpath, filesep, outputname{title_idx}), '-dpdf','-r0');
-            saveas(fig1, strcat(resultpath, filesep, outputname{title_idx}), 'png');
+            print(fig1, strcat(resultfullpath, filesep, outputname{title_idx}), '-dpdf','-r0');
+            saveas(fig1, strcat(resultfullpath, filesep, outputname{title_idx}), 'png');
         end
     end
     

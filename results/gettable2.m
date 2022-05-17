@@ -5,7 +5,7 @@
 clear; close all;
 addpath(genpath('..\functions\display'));
 
-filename = 'goicptrials_bone';
+filename = 'backup/amode_old/goicptrials_bone';
 load(strcat(filename,'.mat'));
 
 n_initposes  = length(description.init_poses);
