@@ -8,7 +8,7 @@ path_result = 'results';
 % path to project
 path_icpnormal = 'functions\experimental';
 path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
-path_goicp     = 'D:\DennisChristie\Go-ICP';
+path_goicp     = 'D:\DennisChristie\Go-ICP\build';
 
 % add paths
 addpath(path_icpnormal);
@@ -91,7 +91,7 @@ noisenormal_const = 2;
 init_poses        = [3 5 8 10];
 n_trials          = 100;
 
-description.algorithm  = 'ukf';
+description.algorithm  = 'goicp';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
