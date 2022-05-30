@@ -1,0 +1,5 @@
+Trials7 is the same as trials6. It is consists of 15 points but different
+configuration, from clumped to dispersed. However in trials 6, i somehow 
+skipped the level 1.5 noise, so there is missing part. Here in trials 7,
+it is consist of [0.5, 1.0, 1.5, 2.0] level of noise and only [10] initial
+pose.
