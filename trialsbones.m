@@ -2,20 +2,21 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim2';
+path_amode  = 'data\bone\amode_accessible_sim1';
 path_result = 'results';
 
 % path to project
 path_icpnormal = 'functions\experimental';
 path_ukf       = 'D:\DennisChristie\unscentedkalmanfilter_registration\functions\ukf';
+path_cpd       = 'D:\Documents\MATLAB\CPD\core';
 path_goicp     = 'D:\DennisChristie\Go-ICP';
 
 % add paths
 addpath(path_icpnormal);
 addpath(path_ukf);
-%addpath(path_goicp);
+addpath(genpath(path_cpd));
 
-displaybone = false;
+displaybone = true;
 
 %% Prepare the bone point cloud
 
@@ -86,12 +87,12 @@ end
 %% Simulation Config
 
 noisetype         = 'uniform';
-noises            = [0 0.5 1.0 1.5 2.0];
+noises            = [2.0];
 noisenormal_const = 2;
-init_poses        = [3 5 8 10];
+init_poses        = [5];
 n_trials          = 100;
 
-description.algorithm  = 'ukf';
+description.algorithm  = 'cpdmyronenko';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
@@ -253,29 +254,58 @@ while (trial <= n_trials)
             rmse_measurement = icpnormal_rmse;  
         end            
 
-    elseif (strcmp(description.algorithm, 'cpd'))
+    elseif (strcmp(description.algorithm, 'cpdmatlab'))
     
         % CPD Registration
         % change the point structure to be suit to matlab icp built in function
         moving = pointCloud(U_noised);
-        fixed  = pcdownsample( pointCloud(Y_breve), 'gridAverage', 2.5);
+        fixed  = pcdownsample( pointCloud(Y_breve), 'gridAverage', 3);
         % register with icp
         [tform, movingReg, cpd_rmse] = pcregistercpd( moving, ...
                                                       fixed, ...
                                                       'Transform', 'Rigid', ...
-                                                      'OutlierRatio', 0.15, ...
-                                                      'MaxIteration', 150, ...
-                                                      'Tolerance', 1e-8, ...
-                                                      'verbose', false);
+                                                      'OutlierRatio', 0.1, ...
+                                                      'MaxIteration', 1000, ...
+                                                      'Tolerance', 1e-10, ...
+                                                      'verbose', true);
     	% change the T form
     	T_all   = tform.T';
         % store the rmse
         rmse_measurement = cpd_rmse;
         
-    elseif (strcmp(description.algorithm, 'cpdnormal'))
+    elseif (strcmp(description.algorithm, 'cpdmyronenko'))
         
-        % to be implemented
+        moving = U_noised;
+        fixed  = pcdownsample( pointCloud(Y_breve), 'gridAverage', 3).Location;
+        
+        % Set the options
+        opt.method='rigid'; % use rigid registration
+        opt.viz=1;          % show every iteration
+        opt.outliers=0.1;   % use 0.6 noise weight
 
+        opt.normalize=0;    % normalize to unit variance and zero mean before registering (default)
+        opt.scale=0;        % estimate global scaling too (default)
+        opt.rot=1;          % estimate strictly rotational matrix (default)
+        opt.corresp=1;      % do not compute the correspondence vector at the end of registration (default).
+                            % Can be quite slow for large data sets.
+
+        opt.max_it=1000;    % max number of iterations
+        opt.tol=1e-10;      % tolerance
+        opt.fgt=0;          % [0,1,2] if > 0, then use FGT.
+                            % case 1: FGT with fixing sigma after it gets too small 
+                            %         (faster, but the result can be rough)
+                            % case 2: FGT, followed by truncated Gaussian approximation 
+                            %         (can be quite slow after switching to the truncated kernels, 
+                            %         but more accurate than case 1)
+                            
+        % register with cpd
+        T = cpd_register(fixed, moving, opt);
+        axis equal;
+        % construct the T
+        T_all = [T.R, T.t; 0 0 0 1];
+        % no rmse reported, so give it NaN
+        rmse_measurement = NaN;        
+        
     elseif (strcmp(description.algorithm, 'ukf'))
 
         % UKF Registration
@@ -399,7 +429,7 @@ while (trial <= n_trials)
         plot3( axes1, ...
                Uest(:,1), ...
                Uest(:,2), ...
-               Uest(:,3), 'or', ...
+               Uest(:,3), 'or', 'MarkerFaceColor', 'r', ...
                'Tag', 'plot_Uest');
         plot3( axes1, ...
                Uest_breve(:,1), ...
@@ -408,6 +438,8 @@ while (trial <= n_trials)
                '.r', 'MarkerSize', 0.1, ...
                'Tag', 'plot_Uest_breve');
     end
+    % zlim([100, max(U_breve(:,3))]);
+    % legend({'Transformed bone (ground truth position)', 'Synthetic A-mode point (fail registered)', 'Corresponding bone position for registered A-mode'}, 'FontSize', 12);
     
     % store the results
     GTs(trial, :, noise, init_pose)               = GT;
