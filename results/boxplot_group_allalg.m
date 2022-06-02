@@ -13,13 +13,13 @@ resultpath     = 'pictures';
 % if you want to compare all algorithm, use 'compare_alg'
 % if you want to compare point numbers, use 'compare_point'
 % if you want to compare point configuration, use 'compare_config'
-display_config = 'compare_config';
-bone           = 'tibia';
-trialname      = 'trials6';
+display_config = 'compare_alg';
+bone           = 'femur';
+trialname      = 'trials1';
 % save picture?
 save_picture   = true;
 % limit error to visualized
-ymax           = 10;
+ymax           = 15;
 yticks         = (1:1:ymax);
 
 % compare algorithm will show all 6 DoF
@@ -28,7 +28,7 @@ if(strcmp(display_config, 'compare_alg'))
     sourcefullpath = strcat(sourcepath, filesep, bone, filesep, trialname);
     % specify source files
     filenames  = { sprintf('%s_%d_%s', 'icp', 15, trialname), ...
-                   sprintf('%s_%d_%s', 'cpd', 15, trialname), ...
+                   'cpdmyronenko_15_trials1', ...
                    sprintf('%s_%d_%s', 'ukf', 15, trialname), ...
                    sprintf('%s_%d_%s', 'goicp', 15, trialname), ...
                    sprintf('%s_%d_%s', 'icpnormal', 15, trialname), ...
@@ -39,7 +39,7 @@ if(strcmp(display_config, 'compare_alg'))
     outputcategory = 'algorithm_comparison';
     resultfullpath = strcat(resultpath, filesep, bone, filesep, outputcategory);
     % specify output files
-    outputname     = sprintf('%s_%s_tz_abserror', 'allalg', bone);
+    outputname     = sprintf('%s_%s_abserror', 'allalg', bone);
     
     
     
@@ -108,7 +108,7 @@ for filename_idx=1:total_algorithms
     init_poses_sel   = 1;
     noises           = description.noises;
     total_noises     = length(noises);
-    noises_sel       = [2, 3, 4, 5];
+    noises_sel       = [1, 3, 5];
     total_noises_sel = length(noises_sel);
     
     for dof_idx=1:total_dof
@@ -124,7 +124,7 @@ if (strcmp(display_config, 'compare_alg'))
 
     % we use subaxis function to control more for the spacing for the subplot
     % https://www.mathworks.com/matlabcentral/fileexchange/3696-subaxis-subplot
-    fig1   = figure('Name', 'Error distribution', 'Position', [0 0 1200 600]);
+    fig1   = figure('Name', 'Error distribution', 'Position', [0 0 1200 700]);
     titles = {'Error distribution t_x (mm)', 'Error distribution t_y (mm)', 'Error distribution t_z (mm)', ...
               'Error distribution R_x (deg)', 'Error distribution R_y (deg)', 'Error distribution R_z (deg)'};
     for dof_idx=1:total_dof
