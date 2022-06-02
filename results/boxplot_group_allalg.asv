@@ -29,6 +29,7 @@ if(strcmp(display_config, 'compare_alg'))
     % specify source files
     filenames  = { sprintf('%s_%d_%s', 'icp', 15, trialname), ...
                    sprintf('%s_%d_%s', 'cpd', 15, trialname), ...
+                   'cpdmyronenko_15_trials2', ...
                    sprintf('%s_%d_%s', 'ukf', 15, trialname), ...
                    sprintf('%s_%d_%s', 'goicp', 15, trialname), ...
                    sprintf('%s_%d_%s', 'icpnormal', 15, trialname), ...
@@ -64,6 +65,8 @@ elseif(strcmp(display_config, 'compare_point'))
     outputname     = { sprintf('%s_%s_%s_tz_abserror', displayname, bone, modename), ...
                        sprintf('%s_%s_%s_rz_abserror', displayname, bone, modename) };
                    
+                   
+    
 % compare config will show only tz and Rz
 elseif(strcmp(display_config, 'compare_config'))
 	% specify source details
@@ -83,21 +86,18 @@ elseif(strcmp(display_config, 'compare_config'))
     displayname    = sprintf('all%s', alg_used);
     outputname     = { sprintf('%s_%s_%s_tz_abserror', displayname, bone, modename), ...
                        sprintf('%s_%s_%s_rz_abserror', displayname, bone, modename) };
-
-% use this if you want to 
 else
     % specify source details
     sourcefullpath = strcat(sourcepath, filesep, bone, filesep, trialname);
     % specify source files
-    filenames  = { 'cpdmyronenko_15_trials0', 'cpdmyronenko_15_trials1', 'cpdmyronenko_15_trials2'};
-    alg_names  = {'Config 1', 'Config 2', 'Config 3'};
+    filenames  = { 'cpdmyronenko_15_trials2', cpd };
+    alg_names  = {'ICP', 'CPD', 'UKF', 'GOICP', 'ICP+norm', 'UKF+norm'};
     
     % specify output folder details
-    outputcategory = 'sensitivity_pointconfig';
+    outputcategory = 'algorithm_comparison';
     resultfullpath = strcat(resultpath, filesep, bone, filesep, outputcategory);
     % specify output files
     outputname     = sprintf('%s_%s_abserror', 'allalg', bone);
-    display_config = 'compare_alg';
 end
 
 % for visualization purpose
