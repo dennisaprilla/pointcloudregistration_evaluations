@@ -2,7 +2,7 @@ clc; clear; close all;
 
 % path to data
 path_bone   = 'data\bone';
-path_amode  = 'data\bone\amode_accessible_sim1';
+path_amode  = 'data\bone\amode_accessible_sim3';
 path_result = 'results';
 
 % path to project
@@ -53,7 +53,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_femur_15';
+filename_amodedata = 'amode_femur_15_conf3';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -93,13 +93,13 @@ noisenormal_const = 2;
 init_poses        = [10];
 n_trials          = 100;
 
-description.algorithm  = 'cpdmyronenko';
+description.algorithm  = 'cpdmatlab';
 description.noises     = noises;
 description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 0;
+trial_number      = 2;
 point_number      = 15;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
@@ -268,7 +268,7 @@ while (trial <= n_trials)
                                                       'OutlierRatio', 0.1, ...
                                                       'MaxIteration', 1000, ...
                                                       'Tolerance', 1e-10, ...
-                                                      'verbose', true);
+                                                      'verbose', false);
     	% change the T form
     	T_all   = tform.T';
         % store the rmse
