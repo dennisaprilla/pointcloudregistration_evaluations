@@ -13,13 +13,13 @@ resultpath     = 'pictures';
 % if you want to compare all algorithm, use 'compare_alg'
 % if you want to compare point numbers, use 'compare_point'
 % if you want to compare point configuration, use 'compare_config'
-display_config = 'compare_custom';
-bone           = 'femur';
-trialname      = 'trials1';
+display_config = 'compare_point';
+bone           = 'tibia';
+trialname      = 'trials2';
 % save picture?
 save_picture   = true;
 % limit error to visualized
-ymax           = 15;
+ymax           = 10;
 yticks         = (1:1:ymax);
 
 % compare algorithm will show all 6 DoF
@@ -121,7 +121,7 @@ for filename_idx=1:total_algorithms
     init_poses_sel   = 1;
     noises           = description.noises;
     total_noises     = length(noises);
-    noises_sel       = [1, 3, 5];
+    noises_sel       = [1, 2, 3, 4];
     total_noises_sel = length(noises_sel);
     
     for dof_idx=1:total_dof
@@ -185,7 +185,6 @@ if (strcmp(display_config, 'compare_alg'))
         grid on;
 
         % limit the y_axis
-        ymax = 15;
         ylim([0, ymax]);
         set(gca,'YTick',(1:2:ymax));
 
@@ -230,7 +229,64 @@ else
                           'MedianStyle', 'target');
         xtickangle(60);
 
-        % coloring the box plot
+        % limit the y_axis -------------------------------------------------------------
+        ylim([0, ymax]);
+        set(gca,'YTick',yticks);
+        
+        % draw the significance star ----------------------------------------------------
+        % i will put the significance star on the ymax only
+        outlier_obj = findobj(gcf, 'Tag', 'Outliers');
+        backup_outlier_obj = outlier_obj;
+        for i=1:length(outlier_obj)
+            del_idx = outlier_obj(i).YData>ymax;
+            outlier_obj(i).YData(del_idx) = [];
+            outlier_obj(i).XData(del_idx) = [];
+        end        
+        
+        % rearrange data (data required by boxplotgroup above is so confusing)
+        data_temp_modified = {};
+        for j=1:size(data_temp{1},2)
+            data_temp_array = [];
+            for i=1:length(data_temp)
+                data_temp_array = [data_temp_array, data_temp{i}(:,j)];               
+            end
+            data_temp_modified{end+1} = data_temp_array;
+        end
+            
+        % now we do our bussiness here
+        n_boxplot_group = length(data_temp_modified);
+        sigstar_group = {};
+        for current_boxplot_group=1:n_boxplot_group
+            current_data_temp = data_temp_modified{current_boxplot_group};
+            n_data_temp = size(current_data_temp,2);
+            
+            % because boxplot group treat a gap between group as one of the
+            % boxplot, we need to put an offset so that our sigstar will
+            % not displayed in the middle of boxplot group
+            sigstar_offset = current_boxplot_group-1;
+            
+            % i want to make a loop to be 1,2; 1,3; 1,4; 2,3; 2,4; 3,4
+            for i=1:n_data_temp
+                for j=i+1:n_data_temp
+                    
+                    % calculate the significance
+                    p = signrank(current_data_temp(:,i),current_data_temp(:,j));
+                    % if it is significance, store the group
+                    if(p<0.05)
+                        % I need to play with the index here. there are 
+                        % groups of boxplot. The individual indexing of the
+                        % boxplot is continously incremented from 1-n. So i
+                        % need adjust from grouped index to overall index.
+                        current_i = (n_data_temp * (current_boxplot_group-1)) + i + sigstar_offset;
+                        current_j = (n_data_temp * (current_boxplot_group-1)) + j + sigstar_offset;
+                        sigstar_group{end+1} = [current_i, current_j];
+                    end
+                end
+            end
+        end
+        sigstar(sigstar_group);
+        
+        % coloring the box plot -------------------------------------------------------
         start_boxelement = (length(h.axis.Children) - total_algorithms)+1;
         end_boxelement   = length(h.axis.Children);
         colorpallete_idx = length(colorpalette);
@@ -241,7 +297,7 @@ else
             colorpallete_idx = colorpallete_idx-1;
         end
 
-        % coloring the dots (median and outliers)
+        % coloring the dots (median and outliers) --------------------------------------
         median_obj = findobj(gcf, 'Tag', 'MedianOuter');
         set(median_obj, 'MarkerSize', 6);
         median_obj = findobj(gcf, 'Tag', 'MedianInner');
@@ -251,7 +307,7 @@ else
         whisker_obj = findobj(gcf, 'Tag', 'Whisker');
         grid on; hold on;
         
-        % line plot the median
+        % line plot the median ---------------------------------------------------------
         total_noises  = total_noises_sel;
         total_configs = size(data_temp, 2);
         median_lines  = zeros(total_noises, 2, total_configs);
@@ -277,11 +333,7 @@ else
             fill_between( x, y1, y2, where, opts{:} );
         end        
 
-        % limit the y_axis
-        ylim([0, ymax]);
-        set(gca,'YTick',yticks);
-
-        % set the title
+        % set the title ----------------------------------------------------------------
         % prepare the subaxis
         title_idx = (dof_idx-start_dofidx)+1;
         ylabel(titles{title_idx});
