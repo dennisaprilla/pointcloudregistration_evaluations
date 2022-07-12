@@ -22,7 +22,7 @@ displaybone = false;
 %% Prepare the bone point cloud
 
 % read the point cloud (bone) from STL/PLY file
-filename_bonedata = 'CT_Femur_R';
+filename_bonedata = 'CT_Tibia_R';
 filepath_bonedata = strcat(path_bone, filesep, filename_bonedata, '.stl');
 ptCloud           = stlread(filepath_bonedata);
 % scale the point cloud in in mm unit
@@ -53,7 +53,7 @@ end
 %% Prepare the A-mode measurement simulation
 
 % read the point cloud (A-mode) from the mat file
-filename_amodedata = 'amode_femur_5';
+filename_amodedata = 'amode_tibia_10';
 filepath_amodedata = strcat(path_amode, filesep, filename_amodedata, '.mat');
 load(filepath_amodedata);
 
@@ -88,7 +88,7 @@ end
 %% Simulation Config
 
 noisetype         = 'uniform';
-noises            = [0 0.5 1.0 1.5 2.0];
+noises            = [0.5 1.0 1.5 2.0];
 noisenormal_const = 2;
 init_poses        = [10];
 n_trials          = 100;
@@ -99,8 +99,8 @@ description.init_poses = init_poses;
 description.trials     = n_trials;
 description.dim_desc   = ["trials", "observation dimensions", "noises", "initial poses"];
 
-trial_number      = 1;
-point_number      = 5;
+trial_number      = 2;
+point_number      = 10;
 filename_result   = sprintf('%s_%d_trials%d.mat', description.algorithm, point_number, trial_number);
 
 GTs               = zeros(n_trials, 6, length(noises), length(init_poses));
